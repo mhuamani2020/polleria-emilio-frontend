@@ -11,6 +11,7 @@ import { MermaFormComponent } from './forms/merma-form.component';
 import { ComboFormComponent } from './forms/combo-form.component';
 import { SedeFormComponent } from './forms/sede-form.component';
 import { ConfirmService } from './services/confirm.service';
+import { WebSocketService } from './services/websocket.service';
 import { ConfirmModalComponent } from './components/confirm-modal.component';
 
 type ViewType = 'dashboard' | 'pos' | 'kds' | 'inventory' | 'customer-display' | 'inventory-edit' | 'staff-register' | 'staff-list' | 'login' | 'merma-register' | 'combo-register' | 'sedes' | 'sede-register' | 'stats';
@@ -113,6 +114,11 @@ export class App {
   private api = inject(ApiService);
   private auth = inject(AuthService);
   private confirmService = inject(ConfirmService);
+  private ws = inject(WebSocketService);
+
+  constructor() {
+    this.ws.messages.subscribe(msg => this.handleWsMessage(msg));
+  }
 
   currentView = signal<ViewType>('login');
   isLoading = signal(false);
@@ -405,11 +411,19 @@ export class App {
 
   changeView(view: ViewType) {
     const role = this.currentUserRole();
-    const adminOnly: ViewType[] = ['dashboard', 'sedes', 'staff-list', 'staff-register', 'sede-register', 'stats'];
-    const cajeroAllowed: ViewType[] = ['pos', 'kds', 'inventory', 'inventory-edit', 'merma-register'];
-    if (role === 'mesero' && !['pos', 'login'].includes(view)) return;
-    if (role === 'cajero' && !cajeroAllowed.includes(view) && !adminOnly.includes(view)) return;
-    if (role === 'cajero' && adminOnly.includes(view)) return;
+    const allowed: Record<string, ViewType[]> = {
+      admin: [
+        'dashboard', 'pos', 'kds', 'inventory', 'inventory-edit',
+        'merma-register', 'combo-register', 'staff-list', 'staff-register',
+        'sedes', 'sede-register', 'stats', 'login',
+      ],
+      cajero: ['pos', 'kds', 'inventory', 'inventory-edit', 'merma-register', 'login'],
+      mesero: ['kds', 'login'],
+    };
+    if (!(allowed[role] || ['login']).includes(view)) {
+      this.addNotification('Acceso Denegado 🚫', 'No tienes permiso para acceder a esta sección.', 'warning');
+      return;
+    }
     this.currentView.set(view);
     this.mobileSidebarOpen.set(false);
     if (view === 'dashboard') { this.loadDashboard(); this.loadNotifications(); }
@@ -633,6 +647,7 @@ export class App {
     try {
       const tokens = await firstValueFrom(this.api.login(body as any));
       this.auth.setTokens(tokens.access_token, tokens.refresh_token);
+      this.ws.connect(tokens.access_token);
       try {
         const user = await firstValueFrom(this.api.getMe());
         this.auth.setSession({
@@ -694,9 +709,33 @@ export class App {
   }
 
   handleLogout() {
+    this.ws.disconnect();
     this.api.logout().subscribe({ error: () => {} });
     this.auth.clear();
     this.currentView.set('login');
+  }
+
+  private handleWsMessage(msg: { type: string; data: any }) {
+    switch (msg.type) {
+      case 'order_created':
+        this.addNotification('Nueva Orden 📋', `Orden registrada`, 'success');
+        if (this.currentView() === 'kds') this.loadKdsTickets();
+        break;
+      case 'order_status_changed':
+        if (this.currentView() === 'kds') this.loadKdsTickets();
+        if (this.currentView() === 'dashboard') this.loadDashboard();
+        break;
+      case 'kds_ticket_updated':
+        if (this.currentView() === 'kds') this.loadKdsTickets();
+        break;
+      case 'notification_new':
+        this.loadNotifications();
+        break;
+      case 'inventory_critical':
+        this.addNotification('Stock Crítico ⚠️', `El stock de un insumo está en nivel crítico.`, 'alert');
+        if (this.currentView() === 'inventory') this.loadInventory();
+        break;
+    }
   }
 
   selectSedeById(id: string) {

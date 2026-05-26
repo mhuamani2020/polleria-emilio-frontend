@@ -34,6 +34,7 @@
       </div>
 
       <nav class="flex-1 px-4 group-hover/sidebar:px-5 py-6 space-y-2 overflow-y-auto subtle-scrollbar transition-all">
+        @if (currentUserRole() === 'admin' || currentUserRole() === 'cajero') {
         <button 
           (click)="changeView('pos')"
           [class]="currentView() === 'pos' ? 'bg-primary text-on-primary font-black shadow-[0_4px_15px_rgba(255,179,0,0.3)]' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
@@ -41,6 +42,7 @@
           <span class="material-symbols-outlined !text-[24px] group-hover:scale-110 transition-transform shrink-0" [class.opacity-80]="currentView() !== 'pos'">point_of_sale</span>
           <span class="truncate opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">POS Terminal</span>
         </button>
+        }
 
         <button 
           (click)="changeView('kds')"
@@ -215,6 +217,7 @@
         </div>
 
         <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+          @if (currentUserRole() === 'admin' || currentUserRole() === 'cajero') {
           <button 
             (click)="changeView('pos')"
             [class]="currentView() === 'pos' ? 'bg-primary text-on-primary font-bold shadow-sm' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
@@ -222,6 +225,7 @@
             <span class="material-symbols-outlined !text-[20px]">point_of_sale</span>
             <span>POS Terminal</span>
           </button>
+          }
 
           <button 
             (click)="changeView('kds')"
@@ -578,7 +582,9 @@
 
       <!-- Center Nav -->
       <div class="flex items-center gap-8">
+        @if (currentUserRole() !== 'mesero') {
         <button (click)="changeView('pos')" class="text-white/60 hover:text-white text-[14px] font-bold transition-colors">POS Terminal</button>
+        }
         <button class="text-[#ffbd0a] text-[14px] font-bold border-b-[3px] border-[#ffbd0a] pb-[3px]">Kitchen KDS</button>
         @if (currentUserRole() === 'admin') {
         <button (click)="changeView('dashboard')" class="text-white/60 hover:text-white text-[14px] font-bold transition-colors">Dashboard</button>
@@ -726,7 +732,9 @@
               }
             </div>
             
+            @if (currentUserRole() !== 'cajero') {
             <button (click)="confirmKdsTransition(ticket, 'start')" class="w-full bg-[#ffcd85] hover:bg-[#ffbd0a] text-[#2a1d00] font-bold py-3 rounded text-[15px] transition-colors shadow-sm active:scale-95">Empezar</button>
+            }
           </div>
           }
           @empty {
@@ -761,7 +769,9 @@
               }
             </div>
             
+            @if (currentUserRole() !== 'cajero') {
             <button (click)="confirmKdsTransition(ticket, 'finish')" class="w-full bg-transparent border border-white/10 text-white/50 font-bold py-2.5 rounded text-[15px] transition-colors active:scale-95 hover:bg-white/5 hover:text-white/80">Terminado</button>
+            }
           </div>
           }
           @empty {
@@ -796,7 +806,9 @@
               }
             </div>
             
+            @if (currentUserRole() !== 'cajero') {
             <button (click)="confirmKdsTransition(ticket, 'deliver')" class="w-full bg-[#3c40c6] border border-white/10 text-white font-bold py-2.5 rounded text-[15px] transition-colors active:scale-95 hover:bg-[#4b4e9f] hover:text-white">Entregar Orden</button>
+            }
           </div>
           }
           @empty {
