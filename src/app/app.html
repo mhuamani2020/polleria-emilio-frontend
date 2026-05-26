@@ -1,0 +1,2094 @@
+<div class="flex h-screen w-full bg-surface text-on-surface overflow-hidden font-sans">
+  
+  <!-- Sidebar -->
+  @if (currentView() !== 'customer-display' && currentView() !== 'kds' && currentView() !== 'login') {
+    <div class="hidden md:block w-[80px] shrink-0"></div>
+    <aside class="hidden md:flex flex-col fixed left-0 top-0 h-full w-[80px] hover:w-[280px] bg-surface-container border-r border-white/5 z-50 transition-all duration-300 overflow-hidden group/sidebar shadow-2xl">
+      <div class="px-6 py-6 border-b border-white/5 flex flex-col gap-3 shrink-0">
+        <div class="flex items-center gap-3 justify-start">
+          <div class="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center font-bold text-[20px] shrink-0 shadow-[0_0_15px_rgba(255,179,0,0.2)]">
+            <span class="material-symbols-outlined !text-[24px]">store</span>
+          </div>
+          <div class="flex flex-1 flex-col min-w-0 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 pointer-events-none group-hover/sidebar:pointer-events-auto">
+            <span class="text-[10px] font-black text-on-surface-variant tracking-wider uppercase opacity-80 leading-none block">Sede Activa</span>
+            @if (currentUserRole() === 'admin') {
+              <div class="relative mt-1">
+                <select 
+                  [value]="currentSede().id" 
+                  (change)="onSedeChange($event)"
+                  class="w-full bg-[#1c1e22] border border-white/10 rounded-md py-1.5 pl-2.5 pr-8 text-[14px] font-black text-[#ffbd0a] hover:border-[#ffbd0a]/40 focus:outline-none appearance-none cursor-pointer leading-none">
+                  @for (s of sedes(); track s.id) {
+                    <option [value]="s.id" class="bg-[#1c1e22] text-white font-semibold">{{ s.name }}</option>
+                  }
+                </select>
+                <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[#ffbd0a] pointer-events-none !text-[18px]">expand_more</span>
+              </div>
+            } @else {
+              <div class="text-[14px] font-extrabold text-[#ffbd0a] mt-1.5 flex items-center gap-1.5">
+                <span class="material-symbols-outlined !text-[16px] text-primary">location_on</span>
+                <span class="truncate max-w-[150px]">{{ currentSede().name }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <nav class="flex-1 px-4 group-hover/sidebar:px-5 py-6 space-y-2 overflow-y-auto subtle-scrollbar transition-all">
+        <button 
+          (click)="changeView('pos')"
+          [class]="currentView() === 'pos' ? 'bg-primary text-on-primary font-black shadow-[0_4px_15px_rgba(255,179,0,0.3)]' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
+          class="w-full flex items-center justify-start gap-5 px-3 py-3.5 rounded-xl transition-all text-[15px] group">
+          <span class="material-symbols-outlined !text-[24px] group-hover:scale-110 transition-transform shrink-0" [class.opacity-80]="currentView() !== 'pos'">point_of_sale</span>
+          <span class="truncate opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">POS Terminal</span>
+        </button>
+
+        <button 
+          (click)="changeView('kds')"
+          [class]="currentView() === 'kds' ? 'bg-primary text-on-primary font-black shadow-[0_4px_15_rgba(255,179,0,0.3)]' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
+          class="w-full flex items-center justify-start gap-5 px-3 py-3.5 rounded-xl transition-all text-[15px] group">
+          <span class="material-symbols-outlined !text-[24px] group-hover:scale-110 transition-transform shrink-0" [class.opacity-80]="currentView() !== 'kds'">restaurant</span>
+          <span class="truncate opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">Kitchen KDS</span>
+        </button>
+        
+        <button 
+          (click)="changeView('dashboard')"
+          [class]="currentView() === 'dashboard' ? 'bg-primary text-on-primary font-black shadow-[0_4px_15px_rgba(255,179,0,0.3)]' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
+          class="w-full flex items-center justify-start gap-5 px-3 py-3.5 rounded-xl transition-all text-[15px] group">
+          <span class="material-symbols-outlined !text-[24px] group-hover:scale-110 transition-transform shrink-0" [class.opacity-80]="currentView() !== 'dashboard'">dashboard</span>
+          <span class="truncate opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">Dashboard</span>
+        </button>
+
+        <button 
+          (click)="changeView('inventory')"
+          [class]="currentView() === 'inventory' ? 'bg-primary text-on-primary font-black shadow-[0_4px_15px_rgba(255,179,0,0.3)]' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
+          class="w-full flex items-center justify-start gap-5 px-3 py-3.5 rounded-xl transition-all text-[15px] group">
+          <span class="material-symbols-outlined !text-[24px] group-hover:scale-110 transition-transform shrink-0" [class.opacity-80]="currentView() !== 'inventory'">inventory_2</span>
+          <span class="truncate opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">Inventory</span>
+        </button>
+        
+        <button 
+          (click)="changeView('staff-list')"
+          [class]="(currentView() === 'staff-list' || currentView() === 'staff-register') ? 'bg-[#3b3db9] text-white font-black shadow-lg' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
+          class="w-full flex items-center justify-start gap-5 px-3 py-3.5 rounded-xl transition-all text-[15px] group">
+          <span class="material-symbols-outlined !text-[24px] group-hover:scale-110 transition-transform shrink-0" [class.opacity-80]="currentView() !== 'staff-list' && currentView() !== 'staff-register'">badge</span>
+          <span class="truncate opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">Staff Management</span>
+        </button>
+
+        <button 
+          (click)="changeView('sedes')"
+          [class]="(currentView() === 'sedes' || currentView() === 'sede-register') ? 'bg-[#ffbd0a] text-black font-black shadow-[0_4px_15px_rgba(255,179,0,0.3)]' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
+          class="w-full flex items-center justify-start gap-5 px-3 py-3.5 rounded-xl transition-all text-[15px] group">
+          <span class="material-symbols-outlined !text-[24px] group-hover:scale-110 transition-transform shrink-0" [class.opacity-80]="currentView() !== 'sedes' && currentView() !== 'sede-register'">storefront</span>
+          <span class="truncate opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">Sedes</span>
+        </button>
+      </nav>
+      
+      <div class="px-4 group-hover/sidebar:px-6 pb-6 pt-4 border-t border-white/5 space-y-4 shrink-0 transition-all">
+        <button 
+          (click)="changeView('stats')"
+          [class]="currentView() === 'stats' ? 'bg-[#ffbd0a] text-[#131517] font-black shadow-[0_4px_15px_rgba(255,179,0,0.3)]' : 'bg-[#ffbd0a]/10 hover:bg-[#ffbd0a]/20 text-[#ffbd0a] font-bold'"
+          class="w-full h-12 flex items-center gap-5 px-3 rounded-xl transition-all group overflow-hidden cursor-pointer">
+          <span class="material-symbols-outlined !text-[24px] group-hover:rotate-12 transition-transform shrink-0" [class.text-[#131517]]="currentView() === 'stats'">bolt</span>
+          <span class="truncate opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 text-[14px]">Quick Stats</span>
+        </button>
+        
+        <div class="flex flex-col gap-1">
+          <button (click)="changeView('login')" class="w-full h-11 flex items-center justify-start gap-5 px-3 rounded-lg text-on-surface-variant hover:text-error hover:bg-error/5 transition-all group">
+            <span class="material-symbols-outlined !text-[22px] group-hover:translate-x-1 transition-transform shrink-0">logout</span>
+            <span class="truncate opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 text-[14px] font-bold">Logout</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+  }
+
+  <!-- Content Container with Mobile Top Header if needed -->
+  <div class="flex-1 flex flex-col overflow-hidden h-full relative">
+    
+    <!-- Mobile/Tablet Top Navbar -->
+    @if (currentView() !== 'customer-display' && currentView() !== 'kds' && currentView() !== 'login') {
+      <div class="flex md:hidden items-center justify-between h-16 px-6 bg-surface-container border-b border-white/5 shrink-0 z-30">
+        <div class="flex items-center gap-2">
+          <button (click)="toggleMobileSidebar()" class="w-10 h-10 -ml-2 flex items-center justify-center rounded text-[#ffbd0a] hover:bg-white/5 active:scale-95 transition-all outline-none">
+            <span class="material-symbols-outlined !text-[24px]">menu</span>
+          </button>
+          <span class="text-md font-extrabold text-[#ffbd0a] tracking-tight">{{ currentSede().name }}</span>
+        </div>
+        <div class="text-[11px] font-bold text-[#ffbd0a] bg-primary/10 border border-[#ffbd0a]/20 px-3 py-1 rounded">
+          @switch (currentView()) {
+            @case ('dashboard') { Admin Overview }
+            @case ('pos') { POS Terminal }
+            @case ('inventory') { Inventario }
+            @case ('inventory-edit') { Editar Insumo }
+            @case ('staff-register') { Personal }
+            @case ('staff-list') { Personal }
+            @case ('merma-register') { Merma }
+            @case ('combo-register') { Combo }
+            @case ('sedes') { Sedes }
+            @case ('sede-register') { Nueva Sede }
+            @case ('stats') { Quick Stats }
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Main View Area -->
+    <main class="flex-1 overflow-hidden relative bg-surface-container-lowest">
+      @switch(currentView()) {
+        @case ('dashboard') {
+          <ng-container *ngTemplateOutlet="dashboardTemplate"></ng-container>
+        }
+        @case ('kds') {
+          <ng-container *ngTemplateOutlet="kdsTemplate"></ng-container>
+        }
+        @case ('pos') {
+          <ng-container *ngTemplateOutlet="posTemplate"></ng-container>
+        }
+        @case ('inventory') {
+          <ng-container *ngTemplateOutlet="inventoryTemplate"></ng-container>
+        }
+        @case ('customer-display') {
+          <ng-container *ngTemplateOutlet="customerDisplayTemplate"></ng-container>
+        }
+        @case ('inventory-edit') {
+          <app-inventory-form (saved)="openModal('stock')" (canceled)="changeView('inventory')" (merma)="changeView('merma-register')"></app-inventory-form>
+        }
+        @case ('staff-register') {
+          <app-staff-form [staffToEdit]="staffToEdit()" (saved)="confirmSaveStaff($event)" (canceled)="staffToEdit.set(null); changeView('staff-list')"></app-staff-form>
+        }
+        @case ('staff-list') {
+          <ng-container *ngTemplateOutlet="staffListTemplate"></ng-container>
+        }
+        @case ('login') {
+          <app-login-form (loginSuccess)="handleLogin($event)"></app-login-form>
+        }
+@case ('merma-register') {
+  <app-merma-form [inventoryItems]="inventoryList()" (saved)="saveMerma($event)" (canceled)="changeView('inventory')"></app-merma-form>
+}
+        @case ('combo-register') {
+          <app-combo-form (saved)="openModal('stock')" (canceled)="changeView('inventory')"></app-combo-form>
+        }
+        @case ('sedes') {
+          <ng-container *ngTemplateOutlet="sedesTemplate"></ng-container>
+        }
+        @case ('sede-register') {
+          <app-sede-form [sedeToEdit]="sedeToEdit()" (saved)="saveSede($event)" (canceled)="changeView('sedes')"></app-sede-form>
+        }
+        @case ('stats') {
+          <ng-container *ngTemplateOutlet="statsTemplate"></ng-container>
+        }
+      }
+    </main>
+  </div>
+
+  <!-- Mobile Sidebar Drawer Container -->
+  @if (mobileSidebarOpen() && currentView() !== 'customer-display' && currentView() !== 'kds' && currentView() !== 'login') {
+    <div class="md:hidden fixed inset-0 z-50 flex animate-fade-in">
+      <!-- Backdrop -->
+      <div (click)="mobileSidebarOpen.set(false)" role="presentation" class="fixed inset-0 bg-black/70 backdrop-blur-[3px] transition-opacity duration-300"></div>
+
+      <!-- Drawer Content -->
+      <aside class="relative flex flex-col w-[280px] max-w-[80vw] bg-surface-container border-r border-white/5 h-full z-10 shadow-2xl animate-slide-in">
+        <div class="flex items-center justify-between px-6 py-6 border-b border-white/5">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded bg-primary text-on-primary flex items-center justify-center font-bold text-[16px]">
+              <span class="material-symbols-outlined !text-[20px]">restaurant</span>
+            </div>
+            <div>
+              <h1 class="text-[15px] leading-tight font-black text-[#ffbd0a] tracking-tight">{{ currentSede().name }}</h1>
+              <p class="text-[9px] font-black text-on-surface-variant tracking-wider uppercase opacity-85 mt-0.5">{{ currentUsername() }}</p>
+            </div>
+          </div>
+          <button (click)="mobileSidebarOpen.set(false)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/5 text-on-surface-variant hover:text-on-surface">
+            <span class="material-symbols-outlined !text-[20px]">close</span>
+          </button>
+        </div>
+
+        <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+          <button 
+            (click)="changeView('pos')"
+            [class]="currentView() === 'pos' ? 'bg-primary text-on-primary font-bold shadow-sm' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
+            class="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all text-[15px]">
+            <span class="material-symbols-outlined !text-[20px]">point_of_sale</span>
+            <span>POS Terminal</span>
+          </button>
+
+          <button 
+            (click)="changeView('kds')"
+            [class]="currentView() === 'kds' ? 'bg-primary text-on-primary font-bold shadow-sm' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
+            class="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all text-[15px]">
+            <span class="material-symbols-outlined !text-[20px]">restaurant</span>
+            <span>Kitchen KDS</span>
+          </button>
+          
+          <button 
+            (click)="changeView('dashboard')"
+            [class]="currentView() === 'dashboard' ? 'bg-primary text-on-primary font-bold shadow-sm' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
+            class="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all text-[15px]">
+            <span class="material-symbols-outlined !text-[20px]">dashboard</span>
+            <span>Dashboard</span>
+          </button>
+
+          <button 
+            (click)="changeView('inventory')"
+            [class]="currentView() === 'inventory' ? 'bg-primary text-on-primary font-bold shadow-sm' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
+            class="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all text-[15px]">
+            <span class="material-symbols-outlined !text-[20px]">inventory_2</span>
+            <span>Inventory</span>
+          </button>
+          
+          <button 
+            (click)="changeView('staff-list')"
+            [class]="(currentView() === 'staff-list' || currentView() === 'staff-register') ? 'bg-[#3b3db9] text-white font-bold shadow-sm' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
+            class="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all text-[15px]">
+            <span class="material-symbols-outlined !text-[20px]">badge</span>
+            <span>Staff</span>
+          </button>
+
+          @if (currentUserRole() === 'admin') {
+            <button 
+              (click)="changeView('sedes')"
+              [class]="currentView() === 'sedes' ? 'bg-[#ffbd0a] text-black font-bold shadow-sm' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
+              class="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all text-[15px]">
+              <span class="material-symbols-outlined !text-[20px]">store</span>
+              <span>Sedes</span>
+            </button>
+            <button 
+              (click)="changeView('stats')"
+              [class]="currentView() === 'stats' ? 'bg-[#ffbd0a] text-black font-bold shadow-sm' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
+              class="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all text-[15px] mt-1">
+              <span class="material-symbols-outlined !text-[20px]">bolt</span>
+              <span>Quick Stats</span>
+            </button>
+          }
+        </nav>
+        
+        <div class="px-4 py-4 border-t border-white/5 flex flex-col gap-1">
+          <button (click)="changeView('login')" class="flex items-center gap-3 transition-colors text-on-surface-variant hover:text-on-surface font-bold text-[14px] px-4 py-2.5 hover:bg-white/5 rounded-lg w-full text-left">
+            <span class="material-symbols-outlined !text-[20px]">logout</span>
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
+    </div>
+  }
+</div>
+
+<!-- Toast Alerts Overlay -->
+<div class="fixed top-6 right-6 z-[200] space-y-3.5 pointer-events-none w-[320px] md:w-[380px]">
+  @for (toast of toasts(); track toast.id) {
+    <div [class.translate-x-0]="toast.visible"
+         [class.opacity-100]="toast.visible"
+         [class.translate-x-12]="!toast.visible"
+         [class.opacity-0]="!toast.visible"
+         class="pointer-events-auto bg-[#1a1c23]/98 border border-white/10 rounded-2xl p-4.5 shadow-2xl flex items-start gap-3.5 transition-all duration-300 transform select-none relative overflow-hidden group">
+      <!-- Glow strip -->
+      <div class="absolute left-0 top-0 bottom-0 w-1.5"
+           [class]="toast.type === 'warning' ? 'bg-amber-400' :
+                     toast.type === 'alert' ? 'bg-error' :
+                     toast.type === 'success' ? 'bg-emerald-400' :
+                     'bg-[#ffbd0a]'">
+      </div>
+      
+      <!-- Icon representation -->
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+           [class]="toast.type === 'warning' ? 'bg-amber-500/10 text-amber-400' :
+                     toast.type === 'alert' ? 'bg-error/10 text-error' :
+                     toast.type === 'success' ? 'bg-emerald-500/10 text-emerald-400' :
+                     'bg-amber-500/10 text-[#ffbd0a]'">
+        @switch (toast.type) {
+          @case ('warning') {
+            <span class="material-symbols-outlined !text-[20px]">warning</span>
+          }
+          @case ('alert') {
+            <span class="material-symbols-outlined !text-[20px]">error_outline</span>
+          }
+          @case ('success') {
+            <span class="material-symbols-outlined !text-[20px]">check_circle</span>
+          }
+          @default {
+            <span class="material-symbols-outlined !text-[20px]">info</span>
+          }
+        }
+      </div>
+
+      <!-- Textual information -->
+      <div class="flex-1 min-w-0 pr-4">
+        <p class="font-extrabold text-[14px] text-white leading-tight mb-1">{{ toast.title }}</p>
+        <p class="text-[12.5px] leading-snug text-[#b0bac5] break-words">{{ toast.message }}</p>
+      </div>
+
+      <!-- Dismiss button -->
+      <button (click)="dismissToast(toast.id)" class="text-on-surface-variant/40 hover:text-white transition-colors cursor-pointer shrink-0 ml-1 mt-0.5">
+        <span class="material-symbols-outlined !text-[18px]">close</span>
+      </button>
+    </div>
+  }
+</div>
+
+<!-- ======================= -->
+<!-- DASHBOARD TEMPLATE -->
+<!-- ======================= -->
+<ng-template #dashboardTemplate>
+  <div class="flex flex-col h-full animate-[fadeIn_0.3s_ease-out]">
+    <header class="flex justify-between items-center h-24 px-10 border-b border-white/5 bg-surface-container-lowest shrink-0">
+      <h2 class="text-2xl font-black text-on-surface tracking-tight flex items-center gap-4">
+        Admin Overview
+        <span class="text-on-surface-variant font-medium text-[15px] tracking-normal border-l border-white/10 pl-4">Real-time stats</span>
+      </h2>
+      <div class="flex gap-4 items-center">
+        <div class="relative">
+          <button (click)="toggleNotifications($event)" class="w-11 h-11 rounded-full flex items-center justify-center hover:bg-surface-container transition-colors text-on-surface border border-white/5 shadow-sm active:scale-95 relative cursor-pointer">
+            <span class="material-symbols-outlined">notifications</span>
+            @if (unreadNotificationsCount() > 0) {
+              <span class="absolute top-1 right-1 w-5 h-5 bg-error text-white font-black text-[10px] rounded-full flex items-center justify-center ring-2 ring-surface text-center animate-pulse">
+                {{ unreadNotificationsCount() }}
+              </span>
+            }
+          </button>
+
+          <!-- Notification Dropdown -->
+          @if (showNotificationsDropdown()) {
+            <div role="menu" tabindex="-1" (keydown)="$event.stopPropagation()" (click)="$event.stopPropagation()" class="absolute right-0 mt-3 w-[290px] md:w-[400px] bg-[#1d2229] border border-white/10 rounded-2xl shadow-2xl z-[90] overflow-hidden animate-[slideUp_0.2s_ease-out]">
+              <!-- Dropdown Header -->
+              <div class="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-[#171a1f]">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[#ffbd0a] !text-[20px]">notifications_active</span>
+                  <span class="font-extrabold text-[15px] text-[#f1f3f5] tracking-tight">Notificaciones</span>
+                  @if (unreadNotificationsCount() > 0) {
+                    <span class="px-2 py-0.5 bg-error/10 text-error font-black text-[10px] rounded uppercase tracking-wider">
+                      {{ unreadNotificationsCount() }} Nuevas
+                    </span>
+                  }
+                </div>
+                <div class="flex items-center gap-3">
+                  @if (notifications().length > 0) {
+                    <button (click)="markAllAsRead()" class="text-[12px] font-black text-[#ffbd0a] hover:underline cursor-pointer">Marcar leídas</button>
+                  }
+                  <button (click)="toggleNotifications()" class="text-[12px] font-black text-on-surface-variant hover:text-white cursor-pointer"><span class="material-symbols-outlined !text-[18px]">close</span></button>
+                </div>
+              </div>
+
+              <!-- Dropdown Items list -->
+              <div class="max-h-[380px] overflow-y-auto subtle-scrollbar divide-y divide-white/5">
+                @if (notifications().length === 0) {
+                  <div class="py-12 px-6 flex flex-col items-center justify-center text-center">
+                    <span class="material-symbols-outlined text-on-surface-variant/20 !text-[56px] mb-3">notifications_off</span>
+                    <p class="text-[15px] font-bold text-on-surface-variant">No tienes notificaciones</p>
+                    <p class="text-[12px] text-on-surface-variant/60 mt-1 max-w-[240px]">Los eventos y alertas de stock de la rotisería aparecerán aquí.</p>
+                  </div>
+                } @else {
+                  @for (item of notifications(); track item.id) {
+                    <button type="button" (click)="markAsRead(item.id, $event)" 
+                         [class.bg-[#16191f]/40]="!item.read" 
+                         [class.hover:bg-white/[0.02]]="item.read"
+                         class="p-4.5 flex gap-3.5 transition-colors cursor-pointer group relative text-left w-full outline-none border-none">
+                      
+                      <!-- Avatar / Icon by type -->
+                      <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border mt-0.5 shadow-sm"
+                           [class]="item.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' :
+                                     item.type === 'alert' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
+                                     item.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
+                                     'bg-blue-500/10 border-blue-500/20 text-blue-500'">
+                        @switch (item.type) {
+                          @case ('warning') {
+                            <span class="material-symbols-outlined !text-[20px]">warning</span>
+                          }
+                          @case ('alert') {
+                            <span class="material-symbols-outlined !text-[20px]">error_outline</span>
+                          }
+                          @case ('success') {
+                            <span class="material-symbols-outlined !text-[20px]">check_circle</span>
+                          }
+                          @default {
+                            <span class="material-symbols-outlined !text-[20px]">info</span>
+                          }
+                        }
+                      </div>
+
+                      <!-- Message details -->
+                      <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-start mb-1">
+                          <p class="text-[14px] font-bold leading-tight truncate pr-4 text-[#f1f3f5] group-hover:text-amber-400 transition-colors">
+                            {{ item.title }}
+                          </p>
+                          @if (!item.read) {
+                            <span class="w-2.5 h-2.5 rounded-full bg-error shrink-0 mt-1.5 shadow-[0_0_8px_rgb(239,68,68)] animate-pulse"></span>
+                          }
+                        </div>
+                        <p class="text-[12.5px] leading-snug text-on-surface-variant/90 break-words mb-2">
+                          {{ item.message }}
+                        </p>
+                        <div class="flex items-center gap-1.5 text-on-surface-variant/50 text-[11px] font-bold">
+                          <span class="material-symbols-outlined !text-[13px]">schedule</span>
+                          <span>{{ item.time }}</span>
+                        </div>
+                      </div>
+                    </button>
+                  }
+                }
+              </div>
+
+              <!-- Dropdown Footer -->
+              @if (notifications().length > 0) {
+                <div class="px-5 py-3.5 border-t border-white/5 bg-[#171a1f] flex justify-between items-center shrink-0">
+                  <p class="text-[11px] font-bold text-on-surface-variant/60">Sistema de Alertas Locales</p>
+                  <button (click)="clearNotifications()" class="text-[12px] font-extrabold text-error hover:underline flex items-center gap-1 cursor-pointer">
+                    <span class="material-symbols-outlined !text-[14px]">delete</span>
+                    Borrar todo
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        <button class="w-11 h-11 rounded-full flex items-center justify-center bg-secondary-container/40 text-on-secondary-container ring-1 ring-white/10 shadow-sm transition-transform hover:scale-105"><span class="material-symbols-outlined">account_circle</span></button>
+      </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-10 subtle-scrollbar">
+      <div class="max-w-6xl mx-auto space-y-8">
+        
+        <div class="bg-gradient-to-r from-error/10 to-[#1e1b1b] border-l-[4px] border-error p-5 md:p-6 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 md:gap-6 shadow-md border border-white/[0.03]">
+           <div class="flex items-start sm:items-center gap-4 min-w-0">
+             <div class="w-12 h-12 rounded-lg bg-error/10 flex items-center justify-center text-error border border-error/20 shadow-sm shrink-0">
+               <span class="material-symbols-outlined !text-2xl">warning</span>
+             </div>
+             <div class="min-w-0">
+               <p class="font-bold text-error text-[16px] md:text-lg tracking-tight mb-0.5">Alerta de Stock Crítico</p>
+               <p class="text-[13px] md:text-[15px] font-medium text-on-surface-variant/90 leading-relaxed">Quedan menos de 10 unidades de Pollo Entero en el depósito principal.</p>
+             </div>
+           </div>
+           <button (click)="changeView('inventory-edit')" class="bg-error text-on-error px-5 py-2.5 sm:px-6 sm:py-3 rounded-lg font-bold shadow-md hover:opacity-95 hover:shadow-error/20 transition-all active:scale-[0.98] whitespace-nowrap self-stretch sm:self-auto text-center cursor-pointer">
+             Abastecer Ahora
+           </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
+           <div class="col-span-1 md:col-span-2 lg:col-span-8 bg-surface-container/80 rounded-xl p-10 border border-white/5 shadow-2xl flex flex-col backdrop-blur-sm relative overflow-hidden">
+              <div class="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent pointer-events-none"></div>
+              <div class="flex justify-between items-center mb-10 relative z-10">
+                <h3 class="text-2xl font-black text-on-surface tracking-tight">Ventas Diarias</h3>
+                <span class="px-5 py-2 bg-surface-variant/80 text-on-surface-variant text-[14px] font-black rounded-lg uppercase tracking-[0.1em] shadow-lg">Hoy</span>
+              </div>
+              <div class="flex-1 min-h-[200px] flex items-end gap-3 px-3 pt-4 border-b border-white/5 relative z-10">
+                <div class="flex-1 bg-primary-container/20 hover:bg-primary-container/40 rounded-t-lg h-[60%] transition-all cursor-pointer"></div>
+                <div class="flex-1 bg-primary-container/20 hover:bg-primary-container/40 rounded-t-lg h-[80%] transition-all cursor-pointer"></div>
+                <div class="flex-1 bg-primary-container/20 hover:bg-primary-container/40 rounded-t-lg h-[40%] transition-all cursor-pointer"></div>
+                <div class="flex-1 bg-primary-container rounded-t-lg h-[95%] transition-all shadow-[0_0_20px_rgba(255,179,0,0.4)] cursor-pointer relative after:absolute after:-top-8 after:left-1/2 after:-translate-x-1/2 after:content-['$3.2k'] after:font-black after:text-primary after:text-sm"></div>
+                <div class="flex-1 bg-primary-container/20 hover:bg-primary-container/40 rounded-t-lg h-[70%] transition-all cursor-pointer"></div>
+                <div class="flex-1 bg-primary-container/20 hover:bg-primary-container/40 rounded-t-lg h-[85%] transition-all cursor-pointer"></div>
+                <div class="flex-1 bg-primary-container/20 hover:bg-primary-container/40 rounded-t-lg h-[30%] transition-all cursor-pointer"></div>
+              </div>
+              <div class="flex justify-between mt-4 text-[13px] text-on-surface-variant/80 font-bold uppercase px-6 tracking-wider">
+                <span>08:00</span><span>12:00</span><span>16:00</span><span>20:00</span><span>22:00</span>
+              </div>
+           </div>
+
+           <div class="col-span-1 md:col-span-2 lg:col-span-4 bg-surface-container-high/80 rounded-xl p-8 border border-white/5 flex flex-col items-center justify-center text-center shadow-lg relative overflow-hidden group">
+             <div class="absolute -right-10 -top-10 w-40 h-40 bg-error/5 rounded-full blur-3xl pointer-events-none group-hover:bg-error/10 transition-colors duration-500"></div>
+             <div class="w-20 h-20 rounded-md bg-error-container/10 text-error flex items-center justify-center mb-6 shadow-inner ring-1 ring-error/20 relative z-10 transition-transform group-hover:scale-105 duration-300">
+               <span class="material-symbols-outlined !text-5xl drop-shadow-md">delete_sweep</span>
+             </div>
+             <h4 class="text-[22px] font-black tracking-tight mb-3 relative z-10 text-on-surface">Registro de Mermas</h4>
+             <p class="text-[15px] text-on-surface-variant mb-8 leading-relaxed relative z-10 font-medium">Contabiliza desperdicios diarios para ajustar el stock automáticamente.</p>
+             <button (click)="changeView('merma-register')" class="w-full py-4 bg-surface-container-lowest hover:bg-surface-variant text-on-surface font-bold rounded-md transition-all shadow-md flex justify-center items-center gap-2 relative z-10 border border-white/5 active:scale-[0.98] cursor-pointer">
+               ABRIR FORMULARIO <span class="material-symbols-outlined !text-[20px]">arrow_forward</span>
+             </button>
+           </div>
+        </div>
+        
+        <div class="bg-surface-container/80 rounded-md border border-white/5 overflow-hidden shadow-lg backdrop-blur-sm">
+          <div class="px-8 py-6 border-b border-white/5 flex items-center justify-between bg-surface-container">
+            <h3 class="text-xl font-bold tracking-tight">Estado de Inventario</h3>
+            <button class="text-primary hover:text-primary-container transition-colors text-[15px] font-bold flex items-center gap-1 active:scale-95">Ver reporte completo <span class="material-symbols-outlined !text-lg">chevron_right</span></button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="bg-surface-container-low/50 text-[13px] uppercase tracking-wider text-on-surface-variant font-bold">
+                   <th class="px-8 py-5 border-b border-white/5">Producto</th>
+                   <th class="px-8 py-5 border-b border-white/5 text-center">Conversión</th>
+                   <th class="px-8 py-5 border-b border-white/5">Stock Actual</th>
+                   <th class="px-8 py-5 border-b border-white/5">Estado</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/5">
+                @for (item of inventory; track item.productName) {
+                  <tr class="hover:bg-white/[0.03] transition-colors group">
+                     <td class="px-8 py-5 flex items-center gap-5">
+                       <div class="w-12 h-12 rounded-md bg-surface-container-highest border border-white/5 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-surface-variant transition-colors">
+                         <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors !text-[26px]">{{item.icon}}</span>
+                       </div>
+                       <span class="font-bold text-[16px] text-on-surface group-hover:text-primary transition-colors">{{item.productName}}</span>
+                     </td>
+                     <td class="px-8 py-5 text-center">
+                       <span class="px-3.5 py-1.5 bg-surface-container-highest text-[13px] text-on-surface-variant font-bold rounded-lg block w-max mx-auto shadow-sm tracking-wide">{{item.ratio}}</span>
+                     </td>
+                     <td class="px-8 py-5 font-black text-lg" [class.text-error]="item.status === 'CRÍTICO'" [class.text-on-surface]="item.status !== 'CRÍTICO'">
+                       {{item.stock}} <span class="text-[14px] font-bold" [class.text-error/70]="item.status === 'CRÍTICO'" [class.text-on-surface-variant]="item.status !== 'CRÍTICO'">unidades</span>
+                     </td>
+                     <td class="px-8 py-5">
+                         <span class="inline-flex items-center text-[12px] font-black px-3 py-1.5 rounded-lg uppercase tracking-widest shadow-sm"
+                               [class.text-error]="item.status === 'Crítico'" [class.bg-error-container/20]="item.status === 'Crítico'"
+                               [class.text-emerald-400]="item.status === 'Óptimo'" [class.bg-emerald-500/10]="item.status === 'Óptimo'"
+                               [class.text-amber-400]="item.status === 'Precaución'" [class.bg-amber-500/10]="item.status === 'Precaución'">
+                           {{item.status}}
+                        </span>
+                     </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- ======================= -->
+<!-- KDS TEMPLATE -->
+<!-- ======================= -->
+<ng-template #kdsTemplate>
+  <div class="flex flex-col h-screen w-full bg-[#1b1b49] text-on-surface font-sans animate-[fadeIn_0.3s_ease-out]">
+    <!-- Header -->
+    <header class="flex justify-between items-center px-6 py-4 bg-[#1a1c23] shrink-0 shadow-sm border-b border-black relative z-10">
+      <!-- Left Side -->
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-[#ffbd0a] !text-[28px]">restaurant</span>
+        <h1 class="text-[20px] font-bold text-[#ffbd0a] tracking-tight">Rotisserie Pro</h1>
+      </div>
+
+      <!-- Center Nav -->
+      <div class="flex items-center gap-8">
+        <button (click)="changeView('pos')" class="text-white/60 hover:text-white text-[14px] font-bold transition-colors">POS Terminal</button>
+        <button class="text-[#ffbd0a] text-[14px] font-bold border-b-[3px] border-[#ffbd0a] pb-[3px]">Kitchen KDS</button>
+        <button (click)="changeView('dashboard')" class="text-white/60 hover:text-white text-[14px] font-bold transition-colors">Dashboard</button>
+      </div>
+
+      <!-- Right Icons -->
+      <div class="flex items-center gap-6 text-[#f1f3f5]">
+        <div class="relative">
+          <button (click)="toggleNotifications($event)" class="hover:text-[#ffbd0a] transition-colors relative cursor-pointer flex items-center justify-center h-[28px] w-[28px]">
+            <span class="material-symbols-outlined !text-[22px]">notifications</span>
+            @if (unreadNotificationsCount() > 0) {
+              <span class="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 bg-error text-white font-black text-[9px] rounded-full flex items-center justify-center ring-2 ring-[#1a1c23] text-center animate-pulse">
+                {{ unreadNotificationsCount() }}
+              </span>
+            }
+          </button>
+
+          <!-- Notification Dropdown -->
+          @if (showNotificationsDropdown()) {
+            <div role="menu" tabindex="-1" (keydown)="$event.stopPropagation()" (click)="$event.stopPropagation()" class="absolute right-0 mt-3.5 w-[295px] md:w-[400px] bg-[#1d2229] border border-white/10 rounded-2xl shadow-2xl z-[90] overflow-hidden text-on-surface animate-[slideUp_0.2s_ease-out]">
+              <!-- Dropdown Header -->
+              <div class="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-[#171a1f]">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[#ffbd0a] !text-[20px]">notifications_active</span>
+                  <span class="font-extrabold text-[15px] text-[#f1f3f5] tracking-tight block">Notificaciones</span>
+                  @if (unreadNotificationsCount() > 0) {
+                    <span class="px-2 py-0.5 bg-error/10 text-error font-black text-[10px] rounded uppercase tracking-wider block">
+                      {{ unreadNotificationsCount() }} Nuevas
+                    </span>
+                  }
+                </div>
+                <div class="flex items-center gap-3">
+                  @if (notifications().length > 0) {
+                    <button (click)="markAllAsRead()" class="text-[12px] font-black text-[#ffbd0a] hover:underline cursor-pointer">Marcar leídas</button>
+                  }
+                  <button (click)="toggleNotifications()" class="text-[12px] font-black text-on-surface-variant hover:text-white cursor-pointer"><span class="material-symbols-outlined !text-[18px]">close</span></button>
+                </div>
+              </div>
+
+              <!-- Dropdown Items list -->
+              <div class="max-h-[380px] overflow-y-auto subtle-scrollbar divide-y divide-white/5">
+                @if (notifications().length === 0) {
+                  <div class="py-12 px-6 flex flex-col items-center justify-center text-center">
+                    <span class="material-symbols-outlined text-on-surface-variant/20 !text-[56px] mb-3">notifications_off</span>
+                    <p class="text-[15px] font-bold text-on-surface-variant">No tienes notificaciones</p>
+                    <p class="text-[12px] text-on-surface-variant/60 mt-1 max-w-[240px]">Los eventos y alertas de stock de la rotisería aparecerán aquí.</p>
+                  </div>
+                } @else {
+                  @for (item of notifications(); track item.id) {
+                    <button type="button" (click)="markAsRead(item.id, $event)" 
+                         [class.bg-[#16191f]/40]="!item.read" 
+                         [class.hover:bg-white/[0.02]]="item.read"
+                         class="p-4.5 flex gap-3.5 transition-colors cursor-pointer group relative text-left w-full outline-none border-none">
+                      
+                      <!-- Avatar / Icon by type -->
+                      <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border mt-0.5 shadow-sm"
+                           [class]="item.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' :
+                                     item.type === 'alert' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
+                                     item.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
+                                     'bg-blue-500/10 border-blue-500/20 text-blue-500'">
+                        @switch (item.type) {
+                          @case ('warning') {
+                            <span class="material-symbols-outlined !text-[20px]">warning</span>
+                          }
+                          @case ('alert') {
+                            <span class="material-symbols-outlined !text-[20px]">error_outline</span>
+                          }
+                          @case ('success') {
+                            <span class="material-symbols-outlined !text-[20px]">check_circle</span>
+                          }
+                          @default {
+                            <span class="material-symbols-outlined !text-[20px]">info</span>
+                          }
+                        }
+                      </div>
+
+                      <!-- Message details -->
+                      <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-start mb-1">
+                          <p class="text-[14px] font-bold leading-tight truncate pr-4 text-[#f1f3f5] group-hover:text-amber-400 transition-colors">
+                            {{ item.title }}
+                          </p>
+                          @if (!item.read) {
+                            <span class="w-2.5 h-2.5 rounded-full bg-error shrink-0 mt-1.5 shadow-[0_0_8px_rgb(239,68,68)] animate-pulse"></span>
+                          }
+                        </div>
+                        <p class="text-[12.5px] leading-snug text-[#b0bac5] break-words mb-2">
+                          {{ item.message }}
+                        </p>
+                        <div class="flex items-center gap-1.5 text-on-surface-variant/50 text-[11px] font-bold">
+                          <span class="material-symbols-outlined !text-[13px]">schedule</span>
+                          <span>{{ item.time }}</span>
+                        </div>
+                      </div>
+                    </button>
+                  }
+                }
+              </div>
+
+              <!-- Dropdown Footer -->
+              @if (notifications().length > 0) {
+                <div class="px-5 py-3.5 border-t border-white/5 bg-[#171a1f] flex justify-between items-center shrink-0">
+                  <p class="text-[11px] font-bold text-on-surface-variant/60">Sistema de Alertas Locales</p>
+                  <button (click)="clearNotifications()" class="text-[12px] font-extrabold text-error hover:text-white hover:underline flex items-center gap-1 cursor-pointer">
+                    <span class="material-symbols-outlined !text-[14px]">delete</span>
+                    Borrar todo
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        <button class="hover:text-[#ffbd0a] transition-colors"><span class="material-symbols-outlined !text-[22px]">account_circle</span></button>
+        <button class="hover:text-[#ffbd0a] transition-colors"><span class="material-symbols-outlined !text-[22px]">settings</span></button>
+      </div>
+    </header>
+
+    <!-- Columns Container -->
+    <div class="flex-1 p-4 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 overflow-hidden">
+      
+      <!-- Nuevos Column bg-[#1a1b26] or similar -->
+      <div class="flex-1 flex flex-col bg-[#14151a] rounded-lg shadow-sm border border-black overflow-hidden relative">
+        <div class="px-6 py-5 flex justify-between items-center shrink-0 border-b border-white/5">
+          <h2 class="text-[24px] font-bold text-white tracking-tight">Nuevos</h2>
+          <span class="w-8 h-8 rounded-xl bg-[#ffbd0a] text-[#14151a] font-black flex items-center justify-center text-[15px]">{{kdsNew().length}}</span>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto px-6 pb-6 pt-4 space-y-4 subtle-scrollbar">
+          @for (ticket of kdsNew(); track ticket.id) {
+          <div class="bg-[#212731] rounded-md border-l-[3px] border-l-[#ffbd0a] p-5 shadow">
+            <div class="flex justify-between items-start mb-5">
+              <div>
+                <h3 class="text-[20px] font-black text-white leading-none mb-1.5">#{{ticket.id}}</h3>
+                <p class="text-[12px] font-bold text-white/50">{{ticket.label}}</p>
+              </div>
+              <div class="flex items-center gap-1.5 text-white/90 font-bold text-[13px]" [class.!text-[#ffbd0a]]="ticket.type === 'Urgent'">
+                <span class="material-symbols-outlined !text-[15px]">timer</span> {{ticket.time}}
+              </div>
+            </div>
+            
+            <div class="space-y-3 mb-6 relative z-10 text-[16px] font-bold leading-snug">
+              @for (item of ticket.items; track $index) {
+                <p class="text-white">{{item}}</p>
+              }
+            </div>
+            
+            <button (click)="confirmKdsTransition(ticket, 'start')" class="w-full bg-[#ffcd85] hover:bg-[#ffbd0a] text-[#2a1d00] font-bold py-3 rounded text-[15px] transition-colors shadow-sm active:scale-95">Empezar</button>
+          </div>
+          }
+          @empty {
+            <p class="text-white/40 text-[14px] text-center mt-10 font-medium">No hay órdenes nuevas</p>
+          }
+        </div>
+      </div>
+
+      <!-- En Preparación - bg opacity for inactive items -->
+      <div class="flex-1 flex flex-col bg-[#14151a] rounded-lg shadow-sm border border-black overflow-hidden relative">
+        <div class="px-6 py-5 flex justify-between items-center shrink-0 border-b border-white/5">
+          <h2 class="text-[24px] font-bold text-white tracking-tight">En Preparación</h2>
+          <span class="w-8 h-8 rounded-xl bg-[#2a2e34] text-white/80 font-black flex items-center justify-center text-[15px]">{{kdsPrep().length}}</span>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto px-6 pb-6 pt-4 space-y-4 subtle-scrollbar">
+          @for (ticket of kdsPrep(); track ticket.id) {
+          <div class="bg-[#212731] rounded-md border-l-[3px] border-[#ffbd0a] p-5 shadow">
+            <div class="flex justify-between items-start mb-5">
+              <div>
+                <h3 class="text-[20px] font-black text-white leading-none mb-1.5">#{{ticket.id}}</h3>
+                <p class="text-[12px] font-bold text-white/40">{{ticket.label}}</p>
+              </div>
+              <div class="flex items-center gap-1.5 text-[#ffbd0a] font-bold text-[13px]">
+                <span class="material-symbols-outlined !text-[15px]">timer</span> {{ticket.time}}
+              </div>
+            </div>
+            
+            <div class="space-y-3 mb-6 relative z-10 text-[16px] font-bold leading-snug">
+              @for (item of ticket.items; track $index) {
+                <p class="text-white">{{item}}</p>
+              }
+            </div>
+            
+            <button (click)="confirmKdsTransition(ticket, 'finish')" class="w-full bg-transparent border border-white/10 text-white/50 font-bold py-2.5 rounded text-[15px] transition-colors active:scale-95 hover:bg-white/5 hover:text-white/80">Terminado</button>
+          </div>
+          }
+          @empty {
+            <p class="text-white/40 text-[14px] text-center mt-10 font-medium">No hay órdenes en preparación</p>
+          }
+        </div>
+      </div>
+
+      <!-- Listos -->
+      <div class="flex-1 flex flex-col bg-[#14151a] rounded-lg shadow-sm border border-black overflow-hidden relative">
+        <div class="px-6 py-5 flex justify-between items-center shrink-0 border-b border-white/5">
+          <h2 class="text-[24px] font-bold text-white tracking-tight">Listos</h2>
+          <span class="w-8 h-8 rounded-xl bg-[#4b4e9f] text-white/90 font-black flex items-center justify-center text-[15px]">{{kdsReady().length}}</span>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto px-6 pb-6 pt-4 space-y-4 subtle-scrollbar">
+          @for (ticket of kdsReady(); track ticket.id) {
+          <div class="bg-[#212731] rounded-md p-5 shadow relative border-l-[3px] border-[#930006]">
+            <div class="flex justify-between items-start mb-5">
+              <div>
+                <h3 class="text-[20px] font-black text-white/90 leading-none mb-1.5">#{{ticket.id}}</h3>
+                <p class="text-[12px] font-bold text-white/60">{{ticket.label}}</p>
+              </div>
+              <div class="flex items-center text-[#ffbd0a]">
+                <span class="material-symbols-outlined text-[18px]">check_circle</span>
+              </div>
+            </div>
+            
+            <div class="space-y-3 mb-6 relative z-10 text-[16px] font-bold leading-snug">
+              @for (item of ticket.items; track $index) {
+                <p class="text-white/80 relative line-through decoration-white/40 decoration-2">{{item}}</p>
+              }
+            </div>
+            
+            <button (click)="confirmKdsTransition(ticket, 'deliver')" class="w-full bg-[#3c40c6] border border-white/10 text-white font-bold py-2.5 rounded text-[15px] transition-colors active:scale-95 hover:bg-[#4b4e9f] hover:text-white">Entregar Orden</button>
+          </div>
+          }
+          @empty {
+            <p class="text-white/40 text-[14px] text-center mt-10 font-medium">No hay órdenes listas</p>
+          }
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Confirm KDS Transition Modal Overlay -->
+    @if (kdsConfirmTicket(); as ticket) {
+      <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out] p-4 text-on-surface">
+        <div class="bg-[#1d2229] border border-white/10 rounded-xl shadow-2xl p-8 max-w-[420px] w-full transform transition-all animate-[slideUp_0.3s_ease-out]">
+          
+          <!-- Icon matching the action -->
+          <div class="w-16 h-16 rounded-full flex items-center justify-center mb-6 shadow-inner mx-auto border"
+               [class.bg-emerald-500/10]="kdsConfirmAction() === 'start'"
+               [class.text-emerald-500]="kdsConfirmAction() === 'start'"
+               [class.border-emerald-500/20]="kdsConfirmAction() === 'start'"
+               [class.bg-blue-500/10]="kdsConfirmAction() === 'finish'"
+               [class.text-blue-400]="kdsConfirmAction() === 'finish'"
+               [class.border-blue-500/20]="kdsConfirmAction() === 'finish'"
+               [class.bg-[#ffbd0a]/10]="kdsConfirmAction() === 'deliver'"
+               [class.text-[#ffbd0a]]="kdsConfirmAction() === 'deliver'"
+               [class.border-[#ffbd0a]/20]="kdsConfirmAction() === 'deliver'">
+            @if (kdsConfirmAction() === 'start') {
+              <span class="material-symbols-outlined !text-[32px]">play_circle</span>
+            } @else if (kdsConfirmAction() === 'finish') {
+              <span class="material-symbols-outlined !text-[32px]">check_circle</span>
+            } @else {
+              <span class="material-symbols-outlined !text-[32px]">local_shipping</span>
+            }
+          </div>
+
+          <!-- Title -->
+          <h3 class="text-center text-[22px] font-black text-white leading-tight mb-2">
+            @if (kdsConfirmAction() === 'start') { ¿Iniciar Preparación? }
+            @if (kdsConfirmAction() === 'finish') { ¿Finalizar Preparación? }
+            @if (kdsConfirmAction() === 'deliver') { ¿Entregar Orden? }
+          </h3>
+          
+          <p class="text-center text-on-surface-variant font-medium text-[14px] mb-6 leading-snug tracking-wide">
+            @if (kdsConfirmAction() === 'start') { Se moverá la orden a la sección de preparación. }
+            @if (kdsConfirmAction() === 'finish') { Se marcará la orden como lista para despacho. }
+            @if (kdsConfirmAction() === 'deliver') { Se entregará y completará la orden de despacho. }
+          </p>
+
+          <!-- Ticket Summary Box -->
+          <div class="bg-[#15181c] border border-white/5 rounded-lg p-5 mb-8 space-y-4 shadow-inner text-left">
+            <div class="flex justify-between items-center pb-2.5 border-b border-white/5">
+              <span class="text-[14px] font-black text-[#ffbd0a] tracking-wider">Orden #{{ ticket.id }}</span>
+              <span class="text-[12px] text-white/50 font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined !text-[14px]">timer</span> {{ ticket.time }}
+              </span>
+            </div>
+            
+            <div class="space-y-2">
+              <p class="text-[11px] text-on-surface-variant font-bold uppercase tracking-wider">Detalles</p>
+              <div class="space-y-1 bg-white/[0.02] p-2.5 rounded border border-white/5">
+                @for (item of ticket.items; track $index) {
+                  <p class="text-[13px] font-bold text-white/95 flex items-start gap-2">
+                    <span class="text-[#ffbd0a]">•</span>
+                    <span>{{ item }}</span>
+                  </p>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions buttons -->
+          <div class="flex gap-4">
+            <button (click)="cancelKdsTransition()" 
+                    class="flex-1 bg-transparent hover:bg-white/[0.05] text-[#f1f3f5] font-bold py-3.5 rounded-lg border border-white/10 transition-colors active:scale-95 cursor-pointer">
+              Cancelar
+            </button>
+            <button (click)="executeKdsTransition()" 
+                    class="flex-1 font-black py-3.5 rounded-lg transition-colors shadow-md active:scale-[0.98] cursor-pointer"
+                    [class.bg-emerald-500]="kdsConfirmAction() === 'start'"
+                    [class.text-[#131517]]="kdsConfirmAction() === 'start'"
+                    [class.hover:bg-emerald-400]="kdsConfirmAction() === 'start'"
+                    [class.bg-blue-500]="kdsConfirmAction() === 'finish'"
+                    [class.text-white]="kdsConfirmAction() === 'finish'"
+                    [class.hover:bg-blue-400]="kdsConfirmAction() === 'finish'"
+                    [class.bg-[#ffbd0a]]="kdsConfirmAction() === 'deliver'"
+                    [class.text-[#211800]]="kdsConfirmAction() === 'deliver'"
+                    [class.hover:bg-[#ffbd0a]/90]="kdsConfirmAction() === 'deliver'">
+              @if (kdsConfirmAction() === 'start') { Iniciar }
+              @if (kdsConfirmAction() === 'finish') { Terminar }
+              @if (kdsConfirmAction() === 'deliver') { Entregar }
+            </button>
+          </div>
+
+        </div>
+      </div>
+    }
+  </div>
+</ng-template>
+
+<!-- ======================= -->
+<!-- POS TEMPLATE -->
+<!-- ======================= -->
+<ng-template #posTemplate>
+  <div class="flex flex-col h-full animate-[fadeIn_0.3s_ease-out] bg-surface-container-lowest">
+    <!-- Streamlined Categories & Search Header for Desktop/Mobile -->
+    <header [class.hidden]="activePosTab() !== 'products'" class="flex flex-col lg:flex-row lg:items-center justify-between bg-surface-container border-b border-white/5 px-4 md:px-8 py-3.5 lg:py-0 lg:h-20 gap-3.5 shrink-0 shadow-sm z-20">
+      <!-- Left side: Category buttons Scrollable list -->
+      <div class="flex-1 min-w-0 flex flex-row flex-nowrap items-center overflow-x-auto gap-2.5 md:gap-3.5 snap-x snap-mandatory subtle-scrollbar py-0.5">
+        @for (cat of posCategories; track cat) {
+          <button 
+            (click)="activeCategory.set(cat)"
+            [class]="activeCategory() === cat ? 'bg-primary border-transparent text-[#131517] shadow-[0_8px_20px_rgba(255,179,0,0.3)] scale-[1.02] font-black' : 'bg-surface-container-high text-on-surface border-white/5 hover:bg-surface-variant font-bold hover:shadow-sm'"
+            class="px-5 py-2.5 rounded-lg border transition-all whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-primary flex items-center gap-2 text-[13px] md:text-[14px] tracking-tight shrink-0 snap-center active:scale-95 cursor-pointer">
+            {{cat}}
+          </button>
+        }
+      </div>
+
+      <!-- Right side: Beautiful Search Input -->
+      <div class="w-full lg:w-72 relative shrink-0">
+        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/60 pointer-events-none !text-[18px]">search</span>
+        <input 
+          type="text" 
+          [value]="posSearchQuery()" 
+          (input)="posSearchQuery.set($any($event.target).value)" 
+          placeholder="Buscar producto..." 
+          class="w-full bg-[#111315] border border-white/10 rounded-xl pl-10 pr-9 py-2.5 text-[13px] text-[#f1f3f5] font-bold placeholder:text-on-surface-variant/40 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all hover:border-white/20 shadow-inner"
+        />
+        @if (posSearchQuery()) {
+          <button (click)="posSearchQuery.set('')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant/50 hover:text-white transition-colors cursor-pointer flex items-center justify-center p-0.5 rounded-full hover:bg-white/5">
+            <span class="material-symbols-outlined !text-[16px]">close</span>
+          </button>
+        }
+      </div>
+    </header>
+
+    <!-- Mobile POS Tab Switcher -->
+    <div class="md:hidden flex border-b border-white/5 bg-surface-container shrink-0 p-1.5 gap-1.5 z-20">
+      <button 
+        (click)="activePosTab.set('products')"
+        [class]="activePosTab() === 'products' ? 'bg-[#ffbd0a] text-[#131517] font-black shadow-lg scale-[1.01]' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-black'"
+        class="flex-1 py-3 px-4 rounded-lg flex items-center justify-center gap-2 text-[14px] transition-all duration-300">
+        <span class="material-symbols-outlined !text-[18px]">restaurant_menu</span>
+        <span>Productos</span>
+      </button>
+      <button 
+        (click)="activePosTab.set('cart')"
+        [class]="activePosTab() === 'cart' ? 'bg-[#ffbd0a] text-[#131517] font-black shadow-lg scale-[1.01]' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-black'"
+        class="flex-1 py-3 px-4 rounded-lg flex items-center justify-center gap-2 text-[14px] transition-all duration-300 relative">
+        <span class="material-symbols-outlined !text-[18px]">shopping_cart</span>
+        <span>Ver Comanda</span>
+        @if (totalOrderItemsCount() > 0) {
+          <span class="bg-error text-white font-black text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-bounce ml-1.5">
+            {{ totalOrderItemsCount() }}
+          </span>
+        }
+      </button>
+    </div>
+
+    <!-- Main Content Grid with optimized Desktop Spacings -->
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden p-3 md:p-5 lg:p-6 gap-4 md:gap-5 lg:gap-6 min-h-0 relative">
+      
+      <!-- Product Grid (Compact, ergonomic grid of beautifully sized cards) -->
+      <div [class.hidden]="activePosTab() !== 'products'" class="md:!block flex-1 overflow-y-auto subtle-scrollbar pr-1.5">
+        <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-5 pb-16 pt-1">
+          @for (prod of filteredPosProducts(); track prod.name) {
+             <button (click)="addItem(prod)" 
+                     [class]="prod.isCombo ? 'border-primary/40 bg-gradient-to-b from-[#1c1d22] to-[#121418] shadow-[0_10px_35px_rgba(255,189,10,0.08)] ring-1 ring-primary/10' : 'bg-surface-container border-white/5'"
+                     class="border rounded-xl overflow-hidden flex flex-col text-left hover:bg-surface-container-high hover:border-primary/40 hover:-translate-y-1 transition-all duration-300 group shadow-md hover:shadow-lg active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-primary relative h-full cursor-pointer">
+                
+                <!-- Radiant Glow for Combo -->
+                @if (prod.isCombo) {
+                  <div class="absolute -right-20 -top-20 w-64 h-64 bg-primary/10 rounded-full blur-[60px] pointer-events-none group-hover:bg-primary/20 transition-colors duration-500"></div>
+                }
+
+                <!-- Optimized Image Height for Desktop Density -->
+                <div class="h-36 md:h-40 xl:h-44 w-full bg-surface-container-highest flex items-center justify-center relative overflow-hidden text-surface-variant shrink-0">
+                  @if (prod.img) {
+                    <img [src]="prod.img" [alt]="prod.name" class="w-full h-full object-cover group-hover:scale-[1.08] transition-transform duration-700 ease-out opacity-90 group-hover:opacity-100" referrerpolicy="no-referrer" />
+                  } @else {
+                     <div class="absolute inset-0 bg-gradient-to-br from-surface-variant/20 to-transparent"></div>
+                     <span class="material-symbols-outlined !text-[64px] text-on-surface-variant/25 group-hover:scale-105 group-hover:text-primary/40 transition-all duration-500 relative z-10">{{prod.icon}}</span>
+                  }
+                  <div class="absolute inset-0 bg-gradient-to-t from-surface-container-high/90 to-transparent pointer-events-none"></div>
+                </div>
+                
+                <!-- Card contents with dense padding -->
+                <div class="p-4 md:p-5 flex flex-col w-full flex-1 bg-surface-container group-hover:bg-surface-container-high transition-colors">
+                   <div class="flex flex-col min-w-0 mb-4">
+                     <div class="flex items-start justify-between gap-3 mb-2.5">
+                        <span class="font-extrabold text-[16px] xl:text-[18px] leading-tight tracking-tight text-white uppercase group-hover:text-primary transition-colors flex-1">{{prod.name}}</span>
+                        <div class="text-primary font-black text-[18px] xl:text-[21px] tracking-tight tabular-nums shrink-0">S/. {{prod.price | number:'1.2-2'}}</div>
+                     </div>
+                     
+                     <span class="text-[11px] font-medium text-on-surface-variant/60 leading-relaxed mb-3 line-clamp-2" [title]="prod.description">
+                       {{ prod.description || (prod.isCombo ? 'Precio promocional familiar por tiempo limitado' : 'Insumos 100% frescos preparados al día') }}
+                     </span>
+
+                     <!-- Combo Items List - Integrated and Dynamic -->
+                     @if (prod.isCombo && prod.comboItems) {
+                        <div class="mt-1 space-y-2 bg-white/[0.03] rounded-lg p-3.5 border border-white/5 border-dashed">
+                           <div class="flex items-center gap-1.5 mb-1.5">
+                             <div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+                             <span class="text-[9px] font-black text-primary uppercase tracking-[0.12em]">Qué incluye</span>
+                           </div>
+                           <ul class="space-y-1.5">
+                             @for (item of prod.comboItems; track item) {
+                               <li class="flex items-start gap-2.5 leading-tight">
+                                 <span class="material-symbols-outlined text-primary !text-[13px] mt-0.5">check_circle</span>
+                                 <span class="text-[12px] text-on-surface font-semibold truncate">{{ item }}</span>
+                               </li>
+                             }
+                           </ul>
+                        </div>
+                     }
+                   </div>
+                   
+                   <!-- Card Bottom action strip -->
+                   <div class="flex flex-col gap-4 mt-auto">
+                     <div class="flex items-center justify-between pt-3 border-t border-white/5">
+                        <div class="flex flex-col">
+                           <span class="text-[8px] font-black text-on-surface-variant uppercase tracking-widest opacity-40 mb-0.5">Estado</span>
+                           <div class="text-[10px] font-black text-emerald-400 flex items-center gap-1 uppercase">
+                              <span class="w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.3)]"></span>
+                              Disponible
+                           </div>
+                        </div>
+                        @if (prod.isCombo) {
+                           <span class="text-[9px] font-black text-[#ffbd0a] bg-[#ffbd0a]/5 px-2.5 py-0.5 rounded border border-[#ffbd0a]/20 uppercase tracking-widest">Premium</span>
+                        }
+                     </div>
+
+                     <div class="w-full h-11 rounded-lg bg-primary hover:bg-primary/95 text-black flex items-center justify-center gap-2 font-black transition-all shadow-[0_3px_10px_rgba(255,189,10,0.1)] hover:shadow-[0_8px_20px_rgba(255,189,10,0.15)] active:scale-[0.96] group/btn overflow-hidden relative">
+                        <div class="absolute inset-0 bg-white/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
+                        <span class="material-symbols-outlined !text-[18px] group-hover/btn:rotate-90 transition-transform relative z-10 font-bold">add_circle</span>
+                        <span class="text-[12px] uppercase tracking-[0.08em] relative z-10">Agregar Orden</span>
+                     </div>
+                   </div>
+                </div>
+             </button>
+          } @empty {
+            <div class="col-span-full py-16 px-6 flex flex-col items-center justify-center text-center">
+              <span class="material-symbols-outlined text-on-surface-variant/25 !text-[64px] mb-4">search_off</span>
+              <p class="text-[17px] font-black text-white tracking-tight">No se encontraron productos</p>
+              <p class="text-[13px] text-on-surface-variant/65 mt-2 max-w-[320px] leading-relaxed font-semibold">
+                No hay resultados para "<span class="text-primary font-bold">{{posSearchQuery()}}</span>" en esta categoría. Intenta buscar otro término o cambiar de categoría.
+              </p>
+              <button (click)="posSearchQuery.set(''); activeCategory.set('Todos')" class="mt-6 bg-surface-container-high hover:bg-surface-variant text-[#ffbd0a] hover:text-white border border-white/5 font-extrabold px-5 py-2.5 rounded-xl text-[13px] transition-all cursor-pointer active:scale-95 shadow-sm">
+                Restablecer filtros
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Right Pane Order Info (Optimized for perfect Desktop layout density) -->
+      <aside [class.hidden]="activePosTab() !== 'cart'" class="md:!flex w-full md:w-[325px] lg:w-[380px] xl:w-[410px] mt-0 bg-surface-container rounded-lg flex flex-col border border-white/5 shrink-0 overflow-hidden shadow-lg relative group">
+         <!-- Sleeker Header with reduced spacing -->
+         <div class="p-6 border-b border-white/5 bg-surface-container-highest flex justify-between items-center shrink-0">
+            <div>
+              <h2 class="text-[20px] md:text-[22px] font-black tracking-tight flex items-center gap-2.5 text-on-surface">
+                Nueva Orden 
+                <span class="bg-primary/10 text-primary border border-primary/20 rounded px-2.5 py-0.5 text-[12px] font-black tracking-wider shadow-sm">#1042</span>
+              </h2>
+              <p class="text-[13px] text-on-surface-variant font-bold mt-1.5 flex items-center gap-1.5"><span class="material-symbols-outlined !text-[15px]">restaurant</span> Para Servir • Mesa 12</p>
+            </div>
+            <button (click)="clearOrder()" class="w-10 h-10 flex items-center justify-center text-error hover:bg-error-container/20 hover:text-error rounded-md transition-all shadow-sm cursor-pointer" title="Limpiar comanda">
+              <span class="material-symbols-outlined !text-[20px]">delete_sweep</span>
+            </button>
+         </div>
+         
+         <!-- Elegant, compact order list items layout -->
+         <div class="flex-1 overflow-y-auto p-4 md:p-5 space-y-3 subtle-scrollbar bg-surface/20">
+            @if (currentOrder().length === 0) {
+              <div class="h-full flex flex-col items-center justify-center text-on-surface-variant/40 space-y-4 py-12">
+                 <div class="w-20 h-20 rounded-full bg-surface-variant/20 flex items-center justify-center">
+                   <span class="material-symbols-outlined !text-[40px] opacity-40">shopping_basket</span>
+                 </div>
+                 <p class="font-bold text-[15px]">La comanda está vacía.</p>
+              </div>
+            }
+            @for (item of currentOrder(); track item.name; let idx = $index) {
+              <div class="bg-surface-container-high/60 p-4 rounded-lg border border-white/5 hover:border-white/10 hover:shadow-sm transition-all relative overflow-hidden">
+                 <div class="flex justify-between items-start font-bold text-[15px] text-on-surface tracking-tight mb-3.5">
+                   <span class="truncate pr-3 leading-tight mt-0.5">{{item.name}}</span>
+                   <span class="text-primary shrink-0 font-black">S/. {{item.price * item.qty | number:'1.2-2'}}</span>
+                 </div>
+                 <div class="flex items-center justify-between">
+                   <span class="text-[12px] text-on-surface-variant font-semibold bg-surface-variant/30 px-2.5 py-0.5 rounded border border-white/5">S/. {{item.price | number:'1.2-2'}} c/u</span>
+                   <div class="flex items-center bg-surface-container-low rounded border border-white/5 overflow-hidden shadow-inner p-0.5">
+                      <button (click)="decrementQty(idx)" class="w-7 h-7 flex items-center justify-center hover:bg-surface-variant rounded text-on-surface transition-colors active:scale-95 active:bg-white/10 cursor-pointer">
+                        <span class="material-symbols-outlined !text-[16px] font-bold">remove</span>
+                      </button>
+                      <span class="w-8 text-center font-black text-[15px] text-white">{{item.qty}}</span>
+                      <button (click)="incrementQty(idx)" class="w-7 h-7 flex items-center justify-center hover:bg-surface-variant rounded text-on-surface transition-colors active:scale-95 active:bg-white/10 cursor-pointer">
+                        <span class="material-symbols-outlined !text-[16px] font-bold">add</span>
+                      </button>
+                   </div>
+                 </div>
+              </div>
+            }
+         </div>
+
+         <!-- Tighter bottom order billing action strip -->
+         <div class="p-5 md:p-6 bg-surface-container-highest border-t border-white/5 space-y-3.5 shrink-0 shadow-[0_-10px_30px_rgba(0,0,0,0.2)] z-10 relative">
+            <div class="flex justify-between text-on-surface text-[14px] font-semibold">
+               <span class="text-on-surface-variant">Subtotal</span>
+               <span>S/. {{orderSubtotal() | number:'1.2-2'}}</span>
+            </div>
+            <div class="flex justify-between text-on-surface text-[14px] font-semibold">
+               <span class="text-on-surface-variant">IGV (18%)</span>
+               <span>S/. {{(orderTotal() - orderSubtotal()) | number:'1.2-2'}}</span>
+            </div>
+            <div class="flex justify-between items-end pt-4 border-t border-white/10 mt-4">
+               <span class="text-[14px] font-bold text-on-surface-variant mb-1">Total a Pagar</span>
+               <span class="text-[30px] font-black text-primary tracking-tight leading-none">S/. {{orderTotal() | number:'1.2-2'}}</span>
+            </div>
+            
+            <button (click)="openModal('order')" [disabled]="currentOrder().length === 0" class="w-full h-[54px] mt-4 bg-[#ffbd0a] hover:bg-[#ffcd85] text-black rounded-lg font-black text-[16px] shadow-[0_6px_20px_rgba(255,179,0,0.25)] hover:shadow-[0_10px_25px_rgba(255,179,0,0.35)] hover:-translate-y-0.5 disabled:opacity-40 disabled:pointer-events-none transition-all active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container focus-visible:ring-primary flex items-center justify-center gap-2 cursor-pointer">
+               COBRAR ORDEN <span class="material-symbols-outlined !text-[22px] font-bold">arrow_forward</span>
+            </button>
+         </div>
+      </aside>
+    </div>
+  </div>
+</ng-template>
+
+<!-- ======================= -->
+<!-- INVENTORY TEMPLATE -->
+<!-- ======================= -->
+<ng-template #inventoryTemplate>
+  <div class="flex flex-col h-full bg-surface-container-lowest animate-[fadeIn_0.2s_ease-out]">
+    <header class="flex flex-col sm:flex-row sm:justify-between sm:items-center px-6 md:px-10 pt-6 md:pt-10 pb-6 gap-4 sm:gap-0 shrink-0">
+      <div>
+        <h2 class="text-[28px] md:text-[36px] font-bold text-on-surface tracking-tight mb-0.5 font-sans leading-none">Gestión de Inventario</h2>
+        <p class="text-[14px] md:text-[15px] font-medium text-on-surface-variant mt-2">Control de stock e insumos del restaurante.</p>
+      </div>
+      <div class="flex gap-3 self-start sm:self-auto">
+        <button (click)="changeView('combo-register')" class="bg-surface-container-high hover:bg-surface-variant text-on-surface font-bold px-5 py-3 rounded-md border border-white/10 shadow-sm flex items-center gap-2 transition-all active:scale-95 cursor-pointer">
+          <span class="material-symbols-outlined !text-[20px]">fastfood</span> Crear Combo
+        </button>
+        <button (click)="changeView('inventory-edit')" class="bg-primary hover:bg-primary-container text-on-primary font-bold px-5 py-3 rounded-md border border-primary/20 shadow-sm flex items-center gap-2 transition-all active:scale-95 cursor-pointer">
+          <span class="material-symbols-outlined !text-[20px]">add</span> Agregar Producto
+        </button>
+      </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto px-6 md:px-10 pb-6 md:pb-10 subtle-scrollbar">
+       <!-- 3 Cards -->
+       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-8">
+         <div class="bg-[#1d2229] p-5 md:p-6 rounded-lg shadow-sm flex flex-col justify-between border border-white/[0.04] hover:shadow-md transition-all duration-300 hover:border-white/[0.08]">
+           <div class="flex justify-between items-center mb-6 md:mb-8 gap-2">
+              <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-on-surface-variant border border-white/[0.03] shrink-0">
+                <span class="material-symbols-outlined !text-[20px]">category</span>
+              </div>
+              <span class="bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-emerald-500/20 shrink-0">
+                <span class="material-symbols-outlined !text-[12px]">arrow_upward</span> +2%
+              </span>
+           </div>
+           <div>
+             <p class="text-on-surface-variant text-[13px] md:text-[14px] font-medium mb-1">Total de Artículos</p>
+             <p class="text-[28px] md:text-[32px] font-bold text-on-surface leading-none tracking-tight">142</p>
+           </div>
+         </div>
+         <div class="bg-[#1d2229] p-5 md:p-6 rounded-lg shadow-sm flex flex-col justify-between border border-white/[0.04] hover:shadow-md transition-all duration-300 hover:border-white/[0.08]">
+           <div class="flex justify-between items-center mb-6 md:mb-8 gap-2">
+              <div class="w-10 h-10 rounded-lg bg-error/10 flex items-center justify-center text-error border border-error/20 shrink-0">
+                <span class="material-symbols-outlined !text-[20px]">warning</span>
+              </div>
+              <span class="bg-error/10 text-error px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-error/20 uppercase tracking-wider shrink-0">
+                Alerta
+              </span>
+           </div>
+           <div>
+             <p class="text-on-surface-variant text-[13px] md:text-[14px] font-medium mb-1">Alertas de Stock Bajo</p>
+             <p class="text-[28px] md:text-[32px] font-bold text-error leading-none tracking-tight">8</p>
+           </div>
+         </div>
+         <div class="bg-[#1d2229] p-5 md:p-6 rounded-lg shadow-sm flex flex-col justify-between border border-white/[0.04] hover:shadow-md transition-all duration-300 hover:border-white/[0.08]">
+           <div class="flex justify-between items-center mb-6 md:mb-8 gap-2">
+              <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-on-surface-variant border border-white/[0.03] shrink-0">
+                <span class="material-symbols-outlined !text-[20px]">trending_down</span>
+              </div>
+              <span class="bg-error/10 text-error px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-error/20 shrink-0">
+                <span class="material-symbols-outlined !text-[12px]">arrow_downward</span> -5%
+              </span>
+           </div>
+           <div>
+             <p class="text-on-surface-variant text-[13px] md:text-[14px] font-medium mb-1">Mermas del Mes</p>
+             <p class="text-[28px] md:text-[32px] font-bold text-on-surface leading-none tracking-tight">S/ 450.00</p>
+           </div>
+         </div>
+       </div>
+
+       <!-- Main Table Card -->
+       <div class="bg-surface-container rounded-md shadow-sm overflow-hidden flex flex-col border border-white/[0.02]">
+         <!-- Toolbar -->
+         <div class="p-6 border-b border-white/[0.05] flex flex-col xl:flex-row gap-4 xl:gap-0 xl:justify-between xl:items-center bg-surface-container/30">
+           <!-- Search -->
+           <div class="w-full xl:w-[380px] relative">
+             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/70 !text-[20px]">search</span>
+             <input type="text"
+                    [value]="inventorySearchText()"
+                    (input)="inventorySearchText.set($any($event.target).value)"
+                    placeholder="Buscar por producto o categoría..."
+                    class="w-full bg-[#111315] border border-white/5 rounded-md pl-12 pr-4 py-2.5 text-[14px] text-on-surface placeholder:text-on-surface-variant/50 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all">
+           </div>
+           <!-- Filters -->
+           <div class="flex flex-wrap items-center gap-2">
+             <button (click)="activeInventoryCategory.set('Todos')" [class]="activeInventoryCategory() === 'Todos' ? 'px-4 py-2 rounded-full border border-primary text-primary font-bold text-[12px] sm:text-[13px] whitespace-nowrap cursor-pointer' : 'px-4 py-2 rounded-full border border-transparent text-on-surface font-bold text-[12px] sm:text-[13px] hover:bg-white/5 transition-colors whitespace-nowrap cursor-pointer'">Todos</button>
+             <button (click)="activeInventoryCategory.set('Pollos')" [class]="activeInventoryCategory() === 'Pollos' ? 'px-4 py-2 rounded-full border border-primary text-primary font-bold text-[12px] sm:text-[13px] whitespace-nowrap cursor-pointer' : 'px-4 py-2 rounded-full border border-transparent text-on-surface font-bold text-[12px] sm:text-[13px] hover:bg-white/5 transition-colors whitespace-nowrap cursor-pointer'">Pollos</button>
+             <button (click)="activeInventoryCategory.set('Combos')" [class]="activeInventoryCategory() === 'Combos' ? 'px-4 py-2 rounded-full border border-primary text-primary font-bold text-[12px] sm:text-[13px] whitespace-nowrap cursor-pointer' : 'px-4 py-2 rounded-full border border-transparent text-on-surface font-bold text-[12px] sm:text-[13px] hover:bg-white/5 transition-colors whitespace-nowrap cursor-pointer'">Combos</button>
+             <button (click)="activeInventoryCategory.set('Gaseosas')" [class]="activeInventoryCategory() === 'Gaseosas' ? 'px-4 py-2 rounded-full border border-primary text-primary font-bold text-[12px] sm:text-[13px] whitespace-nowrap cursor-pointer' : 'px-4 py-2 rounded-full border border-transparent text-on-surface font-bold text-[12px] sm:text-[13px] hover:bg-white/5 transition-colors whitespace-nowrap cursor-pointer'">Gaseosas</button>
+             <button (click)="activeInventoryCategory.set('Insumos')" [class]="activeInventoryCategory() === 'Insumos' ? 'px-4 py-2 rounded-full border border-primary text-primary font-bold text-[12px] sm:text-[13px] whitespace-nowrap cursor-pointer' : 'px-4 py-2 rounded-full border border-transparent text-on-surface font-bold text-[12px] sm:text-[13px] hover:bg-white/5 transition-colors whitespace-nowrap cursor-pointer'">Insumos</button>
+             <div class="relative"><button class="w-9 h-9 sm:ml-2 rounded flex items-center justify-center bg-surface-container-high transition-colors cursor-pointer" (click)="showInventorySortMenu.set(!showInventorySortMenu())" [class.text-primary]="inventorySortOption() !== 'alphabetical-asc' || showInventorySortMenu()" [class.text-on-surface]="inventorySortOption() === 'alphabetical-asc' && !showInventorySortMenu()">
+               <span class="material-symbols-outlined !text-[20px]">filter_list</span>
+              </button>
+              
+              <!-- Dropdown -->
+              @if (showInventorySortMenu()) {
+                <div class="absolute right-0 mt-3 w-60 rounded-xl bg-[#1d2229] border border-white/10 shadow-2xl z-50 py-2 animate-[fadeIn_0.15s_ease-out]">
+                  <div class="px-4 py-2 text-[11px] font-black uppercase tracking-wider text-on-surface-variant/70 border-b border-white/5 mb-2 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined !text-[15px]">sort</span> Ordenar por
+                  </div>
+                  
+                  <button (click)="setInventorySort('alphabetical-asc')" 
+                          class="w-full text-left px-5 py-2.5 text-[13px] hover:bg-white/5 transition-colors flex items-center justify-between cursor-pointer"
+                          [class.text-primary]="inventorySortOption() === 'alphabetical-asc'"
+                          [class.font-black]="inventorySortOption() === 'alphabetical-asc'">
+                    <span>Nombre (A - Z)</span>
+                    @if (inventorySortOption() === 'alphabetical-asc') {
+                      <span class="material-symbols-outlined text-primary !text-[16px] font-bold">check</span>
+                    }
+                  </button>
+                  
+                  <button (click)="setInventorySort('alphabetical-desc')" 
+                          class="w-full text-left px-5 py-2.5 text-[13px] hover:bg-white/5 transition-colors flex items-center justify-between cursor-pointer"
+                          [class.text-primary]="inventorySortOption() === 'alphabetical-desc'"
+                          [class.font-black]="inventorySortOption() === 'alphabetical-desc'">
+                    <span>Nombre (Z - A)</span>
+                    @if (inventorySortOption() === 'alphabetical-desc') {
+                      <span class="material-symbols-outlined text-primary !text-[16px] font-bold">check</span>
+                    }
+                  </button>
+                  
+                  <button (click)="setInventorySort('stock-asc')" 
+                          class="w-full text-left px-5 py-2.5 text-[13px] hover:bg-white/5 transition-colors flex items-center justify-between cursor-pointer"
+                          [class.text-primary]="inventorySortOption() === 'stock-asc'"
+                          [class.font-black]="inventorySortOption() === 'stock-asc'">
+                    <span>Menor Stock primero</span>
+                    @if (inventorySortOption() === 'stock-asc') {
+                      <span class="material-symbols-outlined text-primary !text-[16px] font-bold">check</span>
+                    }
+                  </button>
+                  
+                  <button (click)="setInventorySort('stock-desc')" 
+                          class="w-full text-left px-5 py-2.5 text-[13px] hover:bg-white/5 transition-colors flex items-center justify-between cursor-pointer"
+                          [class.text-primary]="inventorySortOption() === 'stock-desc'"
+                          [class.font-black]="inventorySortOption() === 'stock-desc'">
+                    <span>Mayor Stock primero</span>
+                    @if (inventorySortOption() === 'stock-desc') {
+                      <span class="material-symbols-outlined text-primary !text-[16px] font-bold">check</span>
+                    }
+                  </button>
+                  
+                  <button (click)="setInventorySort('status-critical')" 
+                          class="w-full text-left px-5 py-2.5 text-[13px] hover:bg-white/5 transition-colors flex items-center justify-between cursor-pointer"
+                          [class.text-primary]="inventorySortOption() === 'status-critical'"
+                          [class.font-black]="inventorySortOption() === 'status-critical'">
+                    <span>Estado Crítico primero</span>
+                    @if (inventorySortOption() === 'status-critical') {
+                      <span class="material-symbols-outlined text-primary !text-[16px] font-bold">check</span>
+                    }
+                  </button>
+                </div>
+                
+                <!-- Backdrop to dismiss menu when clicking outside -->
+                <button type="button" class="fixed inset-0 z-40 cursor-default w-full h-full bg-transparent border-0 block" (click)="showInventorySortMenu.set(false)" aria-label="Cerrar panel de ordenamiento"></button>
+              }
+            </div>
+            
+            </div><!--
+             </button>
+           </div>
+         </div>
+
+         -->          </div> <!-- Table -->
+         <div class="w-full overflow-x-auto subtle-scrollbar">
+           <table class="w-full text-left border-collapse min-w-[900px]">
+             <thead>
+               <tr class="border-b border-white/[0.05] text-on-surface-variant text-[12px] font-bold uppercase tracking-wider bg-surface-container/20">
+                 <th class="px-8 py-5">Producto</th>
+                 <th class="px-8 py-5">Categoría</th>
+                 <th class="px-8 py-5 text-center">Conversión</th>
+                 <th class="px-8 py-5 text-center">Stock<br>Actual</th>
+                 <th class="px-8 py-5 text-center">Mínimo</th>
+                 <th class="px-8 py-5 text-center">Estado</th>
+                 <th class="px-8 py-5 text-center">Acciones</th>
+               </tr>
+             </thead>
+             <tbody class="divide-y divide-white/[0.03]">
+                @for (item of filteredInventoryList(); track item.inventoryId) {
+                  <tr class="transition-colors group hover:bg-white/[0.015]" [ngClass]="item.status === 'Crítico' ? 'bg-error/[0.03] border-l-[3px] border-l-error' : 'border-l-[3px] border-l-transparent'">
+                    <td class="px-8 py-5">
+                      <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded bg-surface-container-lowest border border-white/5 flex items-center justify-center text-on-surface-variant shrink-0 relative overflow-hidden group-hover:text-on-surface transition-colors">
+                          <span class="material-symbols-outlined !text-[20px]">{{item.icon}}</span>
+                        </div>
+                         <span class="text-[14px] font-bold text-on-surface tracking-tight leading-tight max-w-[150px]">{{item.productName}}</span>
+                      </div>
+                    </td>
+                    <td class="px-8 py-5 text-[14px] font-bold text-on-surface-variant">{{item.category}}</td>
+                    <td class="px-8 py-5 text-[13px] font-medium text-on-surface-variant text-center">{{item.conversion}}</td>
+                    <td class="px-8 py-5 text-center">
+                       <span class="font-bold text-[14px] block w-full" [ngClass]="item.statusColor || 'text-on-surface'">{{item.stock}}</span>
+                    </td>
+                    <td class="px-8 py-5 text-[14px] font-semibold text-on-surface-variant text-center">{{item.min}}</td>
+                    <td class="px-8 py-5 text-center">
+                       <span class="inline-flex items-center justify-center px-4 py-1.5 rounded-[4px] border text-[11px] font-bold tracking-wide"
+                             [ngClass]="{
+                               'border-emerald-500/50 text-emerald-400 bg-transparent': item.status === 'Óptimo',
+                               'border-primary/50 text-primary bg-transparent': item.status === 'Precaución',
+                               'border-error/30 text-error bg-error/10': item.status === 'Crítico'
+                             }">
+                         {{item.status}}
+                       </span>
+                    </td>
+                    <td class="px-8 py-5">
+                       <div class="flex items-center justify-center gap-2">
+                          <button (click)="changeView('inventory-edit')" class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:text-white hover:bg-white/10 transition-colors">
+                            <span class="material-symbols-outlined !text-[16px]">edit</span>
+                          </button>
+                       </div>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="7" class="px-8 py-12 text-center text-on-surface-variant font-medium text-[14px]">
+                      <div class="flex flex-col items-center justify-center gap-2 bg-[#1d2229]/30 rounded-lg p-6 max-w-[400px] mx-auto my-4 border border-white/[0.02]">
+                        <span class="material-symbols-outlined !text-[36px] text-on-surface-variant/40 animate-pulse">inventory_2</span>
+                        <span class="font-bold text-on-surface/80">No se encontraron productos</span>
+                        <span class="text-[12px] text-on-surface-variant/60">Prueba con otra categoría o término de búsqueda.</span>
+                      </div>
+                    </td>
+                  </tr>
+                }
+             </tbody>
+           </table>
+         </div>
+
+         <!-- Pagination Footer -->
+         <div class="px-6 py-4 bg-surface-container/30 flex justify-between items-center text-[13px]">
+           <span class="font-medium text-on-surface-variant">Mostrando {{ filteredInventoryList().length }} de {{ inventoryList().length }} productos</span>
+           <div class="flex items-center gap-3">
+             <button class="w-7 h-7 rounded bg-surface-container-lowest flex items-center justify-center text-on-surface-variant hover:bg-white/5 transition-colors border border-white/5"><span class="material-symbols-outlined !text-[18px]">chevron_left</span></button>
+             <span class="font-medium text-on-surface-variant">Página 1 de 1</span>
+             <button class="w-7 h-7 rounded bg-surface-container-lowest flex items-center justify-center text-on-surface-variant hover:bg-white/5 transition-colors border border-white/5"><span class="material-symbols-outlined !text-[18px]">chevron_right</span></button>
+           </div>
+         </div>
+       </div>
+
+    </div>
+  </div>
+</ng-template>
+
+<!-- ======================= -->
+<!-- CUSTOMER DISPLAY TEMPLATE -->
+<!-- ======================= -->
+<ng-template #customerDisplayTemplate>
+  <div class="flex flex-col h-screen w-full bg-[#1e2023] text-on-surface font-sans animate-[fadeIn_0.5s_ease-out]">
+    <!-- Header -->
+    <header class="flex justify-between items-center px-10 py-6 border-b border-white/5 bg-[#171a1d] shrink-0">
+      <!-- Clickable logo to go back -->
+      <button (click)="changeView('kds')" title="Volver a KDS" class="flex items-center gap-4 hover:opacity-80 transition-opacity active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary rounded-md outline-none p-1">
+        <div class="w-14 h-14 rounded-md bg-primary text-on-primary flex items-center justify-center shadow-lg shrink-0">
+          <span class="material-symbols-outlined !text-[32px]">restaurant</span>
+        </div>
+        <div class="text-left">
+          <h1 class="text-[32px] font-black tracking-tight text-[#f1f3f5] leading-none mb-1">Rotisserie Pro</h1>
+          <p class="text-[15px] font-bold text-on-surface-variant flex items-center gap-2">Estado de su pedido</p>
+        </div>
+      </button>
+      
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-3 bg-surface-container-high px-5 py-2.5 rounded-full border border-white/5">
+          <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+          <span class="font-bold text-[14px] text-on-surface">Sistema Operativo</span>
+        </div>
+        <div class="text-[32px] font-black text-primary tracking-tighter">
+          09:36
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex overflow-hidden">
+      <!-- Left Column: En Preparación -->
+      <div class="w-1/2 flex flex-col border-r border-white/5 bg-[#1a1c1f]">
+        <div class="h-20 bg-[#212428] flex items-center justify-center gap-4 border-b border-white/5 shrink-0 z-10 shadow-sm">
+          <span class="material-symbols-outlined !text-[32px] text-on-surface-variant w-10 text-center">soup_kitchen</span>
+          <h2 class="text-[28px] font-black text-on-surface tracking-tight">En Preparación</h2>
+        </div>
+        <div class="flex-1 p-8 overflow-y-auto subtle-scrollbar">
+           <div class="grid grid-cols-3 gap-6 auto-rows-[140px]">
+             @for (order of preparingOrders; track order; let i = $index) {
+               <div class="bg-[#24292f] rounded-md flex items-center justify-center shadow-sm" [class.opacity-[0.35]]="order === '133' || order === '134' || order === '135'">
+                 <span class="text-[52px] font-black text-white tracking-tighter drop-shadow-sm">#{{order}}</span>
+               </div>
+             }
+           </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Listo para Entregar -->
+      <div class="w-1/2 flex flex-col bg-[#1e2023]">
+        <div class="h-20 bg-primary flex items-center justify-center gap-4 shadow-md shrink-0 z-10">
+          <span class="material-symbols-outlined !text-[32px] text-on-primary font-bold w-10 text-center">check_circle</span>
+          <h2 class="text-[28px] font-black text-on-primary tracking-tight">Listo para Entregar</h2>
+        </div>
+        <div class="flex-1 p-8 flex flex-col gap-8 overflow-y-auto subtle-scrollbar">
+           
+           <!-- Highlighted Latest Order -->
+           <div class="bg-[#fedba3] rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-[0_15px_40px_rgba(255,189,10,0.15)] relative overflow-hidden animate-[pulse_3s_ease-in-out_infinite] border-2 border-[#ffbd0a]/20">
+             <div class="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/70 to-transparent pointer-events-none"></div>
+             
+             <p class="text-[17px] font-black text-[#5c4018] tracking-[0.25em] mb-2 uppercase relative z-10">Retirar en Barra</p>
+             
+             <h3 class="font-black text-[#3d270b] leading-none tracking-tighter flex items-end justify-center relative z-10 my-4 drop-shadow-sm">
+               <span class="text-[90px] text-[#5c4018] leading-none mr-2 mb-2 font-bold">#</span>
+               <span class="text-[160px] leading-[0.8]">{{latestReadyOrder}}</span>
+             </h3>
+             
+             <p class="text-[22px] font-bold text-[#5c4018] flex items-center justify-center gap-3 mt-2 relative z-10">
+               <span class="material-symbols-outlined !text-[28px]">notifications_active</span> ¡Su orden está lista!
+             </p>
+           </div>
+
+           <!-- Other Ready Orders -->
+           <div class="grid grid-cols-2 gap-6 auto-rows-[160px]">
+             @for (order of readyOrders; track order) {
+               <div class="bg-[#24292f] rounded-lg flex items-center justify-center border border-[#30373f] relative shadow-sm">
+                 <div class="absolute -top-3 -right-3 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white border-4 border-[#1e2023] shadow-sm z-20">
+                   <span class="material-symbols-outlined !text-[18px] font-black">check</span>
+                 </div>
+                 <span class="text-[72px] font-black text-[#fedba3] tracking-tighter drop-shadow-sm">#{{order}}</span>
+               </div>
+             }
+           </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="h-[90px] bg-[#1a1c1f] border-t border-white/5 flex items-center justify-between px-10 shrink-0">
+       <!-- WiFi -->
+       <div class="flex items-center gap-5 bg-[#212428] px-6 py-3.5 rounded-md border border-white/5 shadow-sm">
+         <span class="material-symbols-outlined !text-[32px] text-primary">wifi</span>
+         <div>
+           <p class="text-[13px] text-on-surface-variant font-bold leading-[1.2]">WiFi Gratis</p>
+           <p class="text-[16px] text-white font-black leading-[1.2]">Rotisserie_Guest_5G</p>
+         </div>
+       </div>
+
+       <!-- Promo Banner -->
+       <div class="flex items-center gap-5 -ml-12">
+         <div class="flex gap-2">
+            <img src="https://images.unsplash.com/photo-1598514982205-f36b96d1e8d4?auto=format&fit=crop&q=80&w=120&h=120" alt="Pollo" class="w-[52px] h-[52px] rounded border border-white/10 shadow-sm object-cover" referrerpolicy="no-referrer" />
+            <img src="https://images.unsplash.com/photo-1534352956036-cd81e28d4d9b?auto=format&fit=crop&q=80&w=120&h=120" alt="Papas" class="w-[52px] h-[52px] rounded border border-white/10 shadow-sm object-cover" referrerpolicy="no-referrer" />
+         </div>
+         <div>
+           <p class="text-[16px] font-black text-white leading-[1.2]">¡Pruebe nuestra nueva salsa secreta!</p>
+           <p class="text-[14px] font-medium text-on-surface-variant mt-0.5 leading-[1.2]">Pídala gratis con su Combo Familiar</p>
+         </div>
+       </div>
+
+       <!-- Feedback -->
+       <div class="text-right flex flex-col items-end">
+         <div class="flex text-primary mb-1">
+           <span class="material-symbols-outlined !text-[26px]">star</span>
+           <span class="material-symbols-outlined !text-[26px]">star</span>
+           <span class="material-symbols-outlined !text-[26px]">star</span>
+           <span class="material-symbols-outlined !text-[26px]">star</span>
+           <span class="material-symbols-outlined !text-[26px]">star_half</span>
+         </div>
+         <p class="text-[13px] font-bold text-on-surface-variant">Danos tu opinión en rotisseriepro.com/feedback</p>
+       </div>
+    </footer>
+  </div>
+</ng-template>
+
+<!-- ======================= -->
+<!-- STAFF LIST TEMPLATE -->
+<!-- ======================= -->
+<ng-template #staffListTemplate>
+  <div class="flex flex-col h-full bg-[#131517] text-on-surface animate-[fadeIn_0.2s_ease-out]">
+    <header class="flex justify-between items-start px-10 pt-10 pb-6 shrink-0 border-b border-white/[0.04]">
+      <div>
+        <h2 class="text-[36px] font-bold text-on-surface tracking-tight mb-1 font-sans leading-none">Equipo de Trabajo</h2>
+        <p class="text-[15px] font-medium text-on-surface-variant mt-2 tracking-wide">Gestione a los empleados y sus roles en el sistema.</p>
+      </div>
+      <button (click)="staffToEdit.set(null); changeView('staff-register')" class="bg-[#ffbd0a] hover:bg-[#ffbd0a]/90 text-[#211800] font-bold px-5 py-3 rounded-md shadow-sm flex items-center gap-2 transition-all active:scale-95 cursor-pointer">
+        <span class="material-symbols-outlined !text-[20px]">person_add</span> Registrar Empleado
+      </button>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-10 subtle-scrollbar">
+      <div class="bg-[#1d2229] rounded-md border border-white/[0.04] overflow-hidden shadow-sm">
+        <div class="overflow-x-auto subtle-scrollbar">
+          <table class="w-full text-left text-[14px] min-w-[800px]">
+          <thead class="bg-[#15181c] border-b border-white/[0.04]">
+            <tr>
+              <th class="px-6 py-4 font-bold text-on-surface-variant tracking-wide w-[100px]">ID</th>
+              <th class="px-6 py-4 font-bold text-on-surface-variant tracking-wide">Nombre Completo</th>
+              <th class="px-6 py-4 font-bold text-on-surface-variant tracking-wide">DNI</th>
+              <th class="px-6 py-4 font-bold text-on-surface-variant tracking-wide">Rol</th>
+              <th class="px-6 py-4 font-bold text-on-surface-variant tracking-wide">Turno</th>
+              <th class="px-6 py-4 font-bold text-on-surface-variant tracking-wide">Estado</th>
+              <th class="px-6 py-4"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/[0.02]">
+            @for (staff of staffMembers(); track staff.id) {
+              <tr class="hover:bg-white/[0.02] transition-colors group">
+                <td class="px-6 py-4 font-black text-[#f1f3f5]">#{{staff.id}}</td>
+                <td class="px-6 py-4 font-bold text-white flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-[#242931] flex items-center justify-center text-primary font-black uppercase text-[12px] border border-white/5 shadow-inner">
+                    {{staff.name.charAt(0)}}
+                  </div>
+                  {{staff.name}}
+                </td>
+                <td class="px-6 py-4 text-on-surface-variant font-medium">{{staff.dni}}</td>
+                <td class="px-6 py-4">
+                  <span class="px-2.5 py-1 rounded bg-[#242931] text-white text-[12px] font-bold border border-white/5">
+                    {{staff.role}}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-on-surface-variant font-medium">{{staff.shift}}</td>
+                <td class="px-6 py-4">
+                  <span class="flex items-center gap-2 text-[13px] font-bold" [class.text-emerald-500]="staff.status === 'Activo'" [class.text-error]="staff.status !== 'Activo'">
+                    <span class="w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]" [class.bg-emerald-500]="staff.status === 'Activo'" [class.bg-error]="staff.status !== 'Activo'" [class.animate-pulse]="staff.status === 'Activo'"></span>
+                    {{staff.status}}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <button 
+                      (click)="editStaff(staff)" 
+                      class="text-on-surface-variant hover:text-[#ffbd0a] transition-colors p-2 outline-none rounded-md hover:bg-white/5 cursor-pointer"
+                      title="Editar Colaborador">
+                      <span class="material-symbols-outlined !text-[20px]">edit</span>
+                    </button>
+                    <button 
+                      (click)="confirmDeleteStaff(staff.id)" 
+                      class="text-on-surface-variant hover:text-rose-500 transition-colors p-2 outline-none rounded-md hover:bg-rose-500/10 cursor-pointer"
+                      title="Eliminar Colaborador">
+                      <span class="material-symbols-outlined !text-[20px]">delete_forever</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- ======================= -->
+<!-- SEDES LIST & REGISTER TEMPLATE -->
+<!-- ======================= -->
+<ng-template #sedesTemplate>
+  <div class="flex flex-col h-full bg-[#131517] text-on-surface animate-[fadeIn_0.2s_ease-out]">
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center px-6 md:px-10 pt-8 md:pt-10 pb-6 md:pb-8 shrink-0 border-b border-white/[0.04] gap-6">
+      <div>
+        <h2 class="text-[28px] md:text-[36px] font-black text-on-surface tracking-tight mb-1 font-sans leading-none">Gestión de Sedes</h2>
+        <p class="text-[11px] font-bold text-on-surface-variant/60 mt-2 tracking-[0.2em] font-sans uppercase">Control Operativo de Sucursales</p>
+      </div>
+      <button 
+        (click)="sedeToEdit.set(null); changeView('sede-register')" 
+        class="w-full md:w-auto bg-primary hover:bg-[#ffbd0a] text-[#131517] font-black px-8 py-4 rounded-xl shadow-[0_8px_25px_rgba(255,179,0,0.3)] flex items-center justify-center gap-3 transition-all active:scale-[0.97] text-[15px]">
+        <span class="material-symbols-outlined !text-[24px]">add_business</span>
+        REGISTRAR NUEVA SEDE
+      </button>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-6 md:p-10 subtle-scrollbar">
+      <div class="grid grid-cols-1 gap-8">
+        
+        <!-- Sedes Section (Full Width) -->
+        <div class="space-y-6">
+          <h3 class="text-[18px] md:text-[20px] font-black tracking-tight text-[#ffbd0a] mb-6 flex items-center gap-3">
+            <span class="material-symbols-outlined !text-[24px]">storefront</span> Locales Registrados en el Sistema
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6">
+            @for (s of sedes(); track s.id) {
+              <div 
+                [class]="currentSede().id === s.id ? 'border-[#ffbd0a]/40 bg-[#1e232b] ring-2 ring-[#ffbd0a]/10 shadow-[0_20px_60px_rgba(255,189,10,0.15)]' : 'border-white/5 bg-[#1d2229] shadow-lg'"
+                class="border rounded-xl p-6 md:p-8 flex flex-col transition-all duration-300 hover:shadow-2xl relative overflow-hidden group gap-6">
+                
+                <!-- Radiant Background Effect -->
+                @if (currentSede().id === s.id) {
+                  <div class="absolute -right-20 -top-20 w-80 h-80 bg-[#ffbd0a]/5 rounded-full blur-[100px] pointer-events-none group-hover:bg-[#ffbd0a]/10 transition-colors duration-700"></div>
+                }
+
+                <div class="flex-1 flex flex-col gap-6 relative z-10">
+                  <!-- Header Row: Store info + Status Badge -->
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                      <div [class]="currentSede().id === s.id ? 'bg-[#ffbd0a]/20 text-[#ffbd0a] shadow-[0_0_20px_rgba(255,189,10,0.2)]' : 'bg-[#242931] text-on-surface-variant'" class="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center border border-white/5 transition-all group-hover:rotate-6 shrink-0">
+                        <span class="material-symbols-outlined !text-[24px] md:!text-[28px] font-bold">storefront</span>
+                      </div>
+                      <div class="min-w-0">
+                        <h4 class="font-black text-[18px] md:text-[22px] text-white tracking-tight leading-tight mb-1" [title]="s.name">{{s.name}}</h4>
+                        <span class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded">ID #{{s.id}}</span>
+                      </div>
+                    </div>
+
+                    <!-- Status Badge -->
+                    <div class="shrink-0">
+                       <div [class]="s.status === 'Activa' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'"
+                            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] font-black tracking-[0.1em] uppercase shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full" [class.bg-emerald-500]="s.status === 'Activa'" [class.bg-rose-500]="s.status !== 'Activa'" [class.animate-pulse]="s.status === 'Activa'"></span>
+                        {{s.status}}
+                       </div>
+                    </div>
+                  </div>
+
+                  <!-- Details Grid: Beautifully responsive columns -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 py-6 border-y border-white/[0.04] text-on-surface-variant font-bold">
+                    
+                    <!-- Ubicación -->
+                    <div class="flex flex-col gap-1.5 min-w-0">
+                       <span class="text-[9px] font-black text-on-surface-variant uppercase tracking-widest opacity-40">Ubicación</span>
+                       <div class="flex items-start gap-2.5">
+                         <span class="material-symbols-outlined !text-[18px] text-primary shrink-0 mt-0.5">location_on</span>
+                         <span class="text-[13px] md:text-[14px] text-white/90 font-medium leading-snug break-words">{{s.address}}</span>
+                       </div>
+                    </div>
+
+                    <!-- Responsable -->
+                    <div class="flex flex-col gap-1.5 min-w-0">
+                       <span class="text-[9px] font-black text-on-surface-variant uppercase tracking-widest opacity-40">Encargado</span>
+                       <div class="flex items-center gap-2.5">
+                         <span class="material-symbols-outlined !text-[18px] text-primary shrink-0">person</span>
+                         <span class="text-[13px] md:text-[14px] text-white font-black truncate">{{s.manager}}</span>
+                       </div>
+                    </div>
+
+                    <!-- Contacto -->
+                    <div class="flex flex-col gap-1.5 min-w-0">
+                       <span class="text-[9px] font-black text-on-surface-variant uppercase tracking-widest opacity-40">Contacto</span>
+                       <div class="flex items-center gap-2.5 text-white">
+                         <span class="material-symbols-outlined !text-[18px] text-primary shrink-0">phone</span>
+                         <span class="text-[13px] md:text-[14px] font-black tabular-nums truncate">{{s.phone || '-'}}</span>
+                       </div>
+                    </div>
+
+                    <!-- Ventas consolidado -->
+                    <div class="flex flex-col gap-1.5 min-w-0">
+                       <span class="text-[9px] font-black text-on-surface-variant uppercase tracking-widest opacity-40">Ventas Hoy</span>
+                       <div class="flex items-center gap-2.5">
+                         <span class="material-symbols-outlined !text-[18px] text-[#ffbd0a] shrink-0">payments</span>
+                         <span class="text-[14px] md:text-[16px] text-[#ffbd0a] font-extrabold tabular-nums truncate">{{s.sales || 'S/. 0.00'}}</span>
+                       </div>
+                    </div>
+
+                  </div>
+
+                  <!-- Footer Actions: Status message + Quick Action -->
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
+                    <div class="text-[12px] text-on-surface-variant/70 italic">
+                      @if (currentSede().id === s.id) {
+                        <span class="text-primary font-black flex items-center gap-1.5">
+                          <span class="material-symbols-outlined !text-[16px]">check_circle</span> Esta es tu sede de operaciones actual
+                        </span>
+                      } @else {
+                        Pulse Conectar para cambiar de punto de venta
+                      }
+                    </div>
+
+                    <div class="shrink-0 flex items-center gap-3 w-full sm:w-auto">
+                      <button 
+                        (click)="editSede(s)"
+                        class="bg-[#242931]/80 hover:bg-white/10 text-white border border-white/10 py-3.5 px-4.5 rounded-xl text-[13px] font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-sm hover:shadow-lg cursor-pointer shrink-0"
+                        title="Editar Sede">
+                        <span class="material-symbols-outlined !text-[18px]">edit</span>
+                        <span>Editar</span>
+                      </button>
+
+                      @if (currentSede().id === s.id) {
+                        <div class="flex-1 sm:min-w-[150px] bg-[#ffbd0a]/10 border border-[#ffbd0a]/20 text-[#ffbd0a] py-3.5 px-5 rounded-xl text-[13px] font-black flex items-center justify-center gap-2.5 shadow-[0_10px_30px_rgba(255,189,10,0.1)]">
+                          <span class="material-symbols-outlined !text-[18px] animate-pulse">verified_user</span>
+                          <span>SEDE ACTIVA</span>
+                        </div>
+                      } @else {
+                        <button 
+                          (click)="selectSedeById(s.id)"
+                          class="flex-1 sm:min-w-[150px] bg-[#242931]/55 hover:bg-primary hover:text-black hover:font-black text-on-surface-variant hover:text-black border border-white/10 hover:border-transparent py-3.5 px-5 rounded-xl text-[13px] font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-sm hover:shadow-xl cursor-pointer">
+                          <span class="material-symbols-outlined !text-[18px]">swap_horiz</span>
+                          <span>CONECTAR LOCAL</span>
+                        </button>
+                      }
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- ======================= -->
+<!-- OVERLAYS: MODALS & LOADING -->
+<!-- ======================= -->
+@if (isLoading()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]">
+    <div class="flex flex-col items-center gap-5">
+      <div class="w-16 h-16 border-4 border-[#ffbd0a]/20 border-t-[#ffbd0a] rounded-full animate-spin"></div>
+      <p class="text-white font-bold tracking-widest uppercase text-[14px]">Procesando...</p>
+    </div>
+  </div>
+}
+
+@if (showModal() !== 'none') {
+  <div class="fixed inset-0 z-[90] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out] p-4">
+    <div class="bg-[#1d2229] border border-white/10 rounded-xl shadow-2xl p-8 max-w-[420px] w-full transform transition-all animate-[slideUp_0.3s_ease-out]">
+      
+      <!-- Icon based on Modal Type -->
+      <div class="w-16 h-16 rounded-full flex items-center justify-center mb-6 shadow-inner mx-auto" 
+           [class.bg-[#ffbd0a]/10]="showModal() === 'order' || showModal() === 'sede'"
+           [class.text-[#ffbd0a]]="showModal() === 'order' || showModal() === 'sede'"
+           [class.border]="true"
+           [class.border-[#ffbd0a]/20]="showModal() === 'order' || showModal() === 'sede'"
+           [class.bg-[#3b3db9]/10]="showModal() === 'stock'"
+           [class.text-[#3b3db9]]="showModal() === 'stock'"
+           [class.border-[#3b3db9]/20]="showModal() === 'stock'"
+           [class.bg-emerald-500/10]="showModal() === 'staff' || showModal() === 'staff-update'"
+           [class.text-emerald-500]="showModal() === 'staff' || showModal() === 'staff-update'"
+           [class.border-emerald-500/20]="showModal() === 'staff' || showModal() === 'staff-update'"
+           [class.bg-rose-500/10]="showModal() === 'staff-delete'"
+           [class.text-rose-500]="showModal() === 'staff-delete'"
+           [class.border-rose-500/20]="showModal() === 'staff-delete'">
+        
+        <span class="material-symbols-outlined !text-[32px]">
+          @if (showModal() === 'order') { check_circle }
+          @if (showModal() === 'stock') { inventory }
+          @if (showModal() === 'staff') { person_add }
+          @if (showModal() === 'staff-update') { manage_accounts }
+          @if (showModal() === 'staff-delete') { group_remove }
+          @if (showModal() === 'sede') { store }
+        </span>
+      </div>
+
+      <h3 class="text-[24px] font-black text-center text-white mb-2 leading-tight">
+        @if (showModal() === 'order') { Confirmar Pedido }
+        @if (showModal() === 'stock') { Actualizar Stock }
+        @if (showModal() === 'staff') { Registrar Empleado }
+        @if (showModal() === 'staff-update') { Actualizar Empleado }
+        @if (showModal() === 'staff-delete') { Eliminar Miembro }
+        @if (showModal() === 'sede') { Sede Registrada }
+      </h3>
+      
+      <p class="text-center text-on-surface-variant font-medium text-[15px] mb-8 leading-snug tracking-wide">
+        @if (showModal() === 'order') { ¿Estás seguro que deseas confirmar el pago y enviar el pedido a cocina? }
+        @if (showModal() === 'stock') { Se actualizarán las cantidades de los insumos en el inventario actual. }
+        @if (showModal() === 'staff') { El nuevo empleado será agregado al sistema y podrá iniciar sesión. }
+        @if (showModal() === 'staff-update') { ¿Estás seguro que deseas actualizar los datos de este empleado? }
+        @if (showModal() === 'staff-delete') { ¿Estás seguro que deseas remover a este miembro de tu equipo de trabajo? }
+        @if (showModal() === 'sede') { El nuevo local ha sido creado correctamente y ya es el punto de trabajo activo. }
+      </p>
+
+      <div class="flex items-center gap-4">
+        <button (click)="closeModal()" class="flex-1 bg-surface-variant hover:bg-white/10 text-white font-bold py-3.5 rounded-lg transition-colors border border-white/5 active:scale-95">
+          Cancelar
+        </button>
+        <button (click)="executeAction()" 
+                class="flex-1 font-bold py-3.5 rounded-lg transition-colors shadow-md active:scale-95 text-[#131517]"
+                [class.bg-[#ffbd0a]]="showModal() === 'order' || showModal() === 'sede'"
+                [class.hover:bg-[#ffcd85]]="showModal() === 'order' || showModal() === 'sede'"
+                [class.bg-[#3b3db9]]="showModal() === 'stock'"
+                [class.hover:bg-[#4b4e9f]]="showModal() === 'stock'"
+                [class.text-white]="showModal() === 'stock'"
+                [class.bg-emerald-500]="showModal() === 'staff' || showModal() === 'staff-update'"
+                [class.hover:bg-emerald-400]="showModal() === 'staff' || showModal() === 'staff-update'"
+                [class.bg-rose-600]="showModal() === 'staff-delete'"
+                [class.hover:bg-rose-500]="showModal() === 'staff-delete'"
+                [class.text-white]="showModal() === 'staff-delete'">
+          Confirmar
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ======================= -->
+<!-- QUICK STATS TEMPLATE -->
+<!-- ======================= -->
+<ng-template #statsTemplate>
+  <div class="flex flex-col h-full overflow-hidden animate-[fadeIn_0.3s_ease-out] text-white">
+    <!-- Header -->
+    <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center p-8 lg:px-10 border-b border-white/5 bg-surface-container-lowest shrink-0 gap-6">
+      <div>
+        <h2 class="text-2xl font-black text-on-surface tracking-tight flex items-center gap-3">
+          <span class="material-symbols-outlined text-[#ffbd0a] !text-[32px]">bolt</span>
+          <span>Métricas de Rendimiento</span>
+          <span class="text-on-surface-variant font-medium text-[15px] tracking-normal border-l border-white/10 pl-4 hidden sm:inline">Panel en tiempo real</span>
+        </h2>
+        <p class="text-[14px] text-on-surface-variant font-medium mt-1 leading-relaxed">
+          Monitoreo integral de ventas, tiempos de preparación e inventario por sucursal.
+        </p>
+      </div>
+
+      <!-- Action: Simular Venta -->
+      <button 
+        (click)="simulateTransaction()" 
+        class="bg-gradient-to-r from-[#ffbd0a] to-[#ffa502] hover:from-[#ffa502] hover:to-[#ffbd0a] text-black font-black px-6 py-3.5 rounded-xl shadow-[0_4px_20px_rgba(255,179,0,0.3)] hover:shadow-[0_4px_25px_rgba(255,179,0,0.45)] transition-all active:scale-95 flex items-center gap-2.5 duration-200 cursor-pointer self-stretch lg:self-auto justify-center">
+        <span class="material-symbols-outlined font-bold !text-[20px]">add_circle</span>
+        <span>SIMULAR VENTA EN VIVO</span>
+      </button>
+    </header>
+
+    <!-- Metrics filters & body scroll container -->
+    <div class="flex-1 overflow-y-auto p-6 lg:p-10 subtle-scrollbar">
+      <div class="max-w-6xl mx-auto space-y-8">
+        
+        <!-- Interactive Controls (Filter Pills) -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#14171a] p-4 rounded-2xl border border-white/5 shadow-inner">
+          
+          <!-- Sede Filters -->
+          <div class="space-y-1.5 w-full sm:w-auto">
+            <span class="block text-[11px] font-black uppercase text-white/40 tracking-wider">Filtrar por Sucursal</span>
+            <div class="flex flex-wrap gap-1.5">
+              <button 
+                (click)="statsSedeFilter.set('all')"
+                [class]="statsSedeFilter() === 'all' ? 'bg-[#ffbd0a] text-[#131517] font-black shadow-md' : 'bg-white/[0.04] hover:bg-white/[0.08] text-white/80 font-bold'"
+                class="px-4 py-2 rounded-lg text-[13px] transition-all cursor-pointer">
+                Todas las Sedes
+              </button>
+              @for (sede of sedes(); track sede.id) {
+                <button 
+                  (click)="statsSedeFilter.set(sede.id)"
+                  [class]="statsSedeFilter() === sede.id ? 'bg-[#ffbd0a] text-[#131517] font-black shadow-md' : 'bg-white/[0.04] hover:bg-white/[0.08] text-white/80 font-bold'"
+                  class="px-4 py-2 rounded-lg text-[13px] transition-all cursor-pointer">
+                  {{ sede.name.split(' ')[1] || sede.name }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Time Range Filters -->
+          <div class="space-y-1.5 w-full sm:w-auto">
+            <span class="block text-[11px] font-black uppercase text-white/40 tracking-wider sm:text-right">Periodo de Tiempo</span>
+            <div class="flex bg-white/[0.03] p-1 rounded-lg border border-white/5 w-full sm:w-auto">
+              @for (range of statsTimeRanges; track range) {
+                <button 
+                  (click)="statsTimeRange.set(range)"
+                  [class]="statsTimeRange() === range ? 'bg-[#ffbd0a] text-[#131517] font-black shadow-sm' : 'hover:bg-white/[0.04] text-white/75 font-bold'"
+                  class="flex-1 sm:flex-initial px-4 py-1.5 rounded-md text-[13px] transition-all cursor-pointer">
+                  {{ range }}
+                </button>
+              }
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Row 1: KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          
+          <!-- Card: Total Revenues -->
+          <div class="relative bg-surface-container/60 border border-white/5 rounded-2xl p-6 shadow-xl flex flex-col justify-between overflow-hidden group">
+            <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none group-hover:bg-primary/10 transition-colors duration-500"></div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-[13px] font-black uppercase text-on-surface-variant/85 tracking-wider">Ingresos Estimados</span>
+              <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center">
+                <span class="material-symbols-outlined !text-[20px]">payments</span>
+              </div>
+            </div>
+            <div>
+              <p class="text-3xl font-black text-white tracking-tight leading-none mb-2">
+                S/. {{ statsComputedRevenue() | number:'1.2-2' }}
+              </p>
+              <div class="flex items-center gap-1.5 text-[12px] font-bold">
+                @if (statsSedeFilter() === '3') {
+                  <span class="text-rose-400 flex items-center gap-0.5"><span class="material-symbols-outlined !text-[14px]">info</span> Inactiva</span>
+                } @else {
+                  <span class="text-emerald-400 flex items-center gap-0.5"><span class="material-symbols-outlined !text-[14px]">trending_up</span> +12.4%</span>
+                  <span class="text-on-surface-variant/70">vs anterior</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Card: Orders Despatched -->
+          <div class="relative bg-surface-container/60 border border-white/5 rounded-2xl p-6 shadow-xl flex flex-col justify-between overflow-hidden group">
+            <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-[#3c40c6]/5 rounded-full blur-2xl pointer-events-none group-hover:bg-[#3c40c6]/10 transition-colors duration-500"></div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-[13px] font-black uppercase text-on-surface-variant/85 tracking-wider">Boletas / Pedidos</span>
+              <div class="w-10 h-10 rounded-xl bg-[#3c40c6]/15 text-[#5e63f6] border border-[#3c40c6]/20 flex items-center justify-center">
+                <span class="material-symbols-outlined !text-[20px]">shopping_bag</span>
+              </div>
+            </div>
+            <div>
+              <p class="text-3xl font-black text-white tracking-tight leading-none mb-2">
+                {{ statsComputedOrders() | number }}
+              </p>
+              <p class="text-[12px] text-on-surface-variant/80 font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined !text-[13px]">analytics</span>
+                <span>Despachados sin errores</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Card: Prep speed -->
+          <div class="relative bg-surface-container/60 border border-white/5 rounded-2xl p-6 shadow-xl flex flex-col justify-between overflow-hidden group">
+            <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-[#10ac84]/5 rounded-full blur-2xl pointer-events-none group-hover:bg-[#10ac84]/10 transition-colors duration-500"></div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-[13px] font-black uppercase text-on-surface-variant/85 tracking-wider">Cocina (KDS) Promedio</span>
+              <div class="w-10 h-10 rounded-xl bg-[#10ac84]/15 text-[#24d29f] border border-[#10ac84]/25 flex items-center justify-center">
+                <span class="material-symbols-outlined !text-[20px]">timer</span>
+              </div>
+            </div>
+            <div>
+              <p class="text-3xl font-black text-white tracking-tight leading-none mb-2">
+                {{ statsSedeFilter() === '3' ? '0.0' : statsComputedPrepTime() }} <span class="text-lg font-bold text-white/60">min</span>
+              </p>
+              <p class="text-[12px] text-on-surface-variant/80 font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined !text-[13px]">check_circle</span>
+                <span>Promedio de despacho hoy</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Card: Filter info details -->
+          <div class="relative bg-surface-container/60 border border-white/5 rounded-2xl p-6 shadow-xl flex flex-col justify-between overflow-hidden group">
+            <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/10 transition-colors duration-500"></div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-[13px] font-black uppercase text-on-surface-variant/85 tracking-wider">Filtro Activo</span>
+              <div class="w-10 h-10 rounded-xl bg-white/[0.04] text-white/50 border border-white/10 flex items-center justify-center">
+                <span class="material-symbols-outlined !text-[20px]">storefront</span>
+              </div>
+            </div>
+            <div>
+              <p class="text-[18px] font-black text-white tracking-normal leading-tight mb-1 truncate" [title]="statsSedeFilter() === 'all' ? 'Todas las Sedes' : 'Sede #' + statsSedeFilter()">
+                {{ statsSedeFilter() === 'all' ? 'Todas las Sedes' : (statsSedeFilter() === '1' ? 'Sede Surco' : statsSedeFilter() === '2' ? 'Sede Miraflores' : 'Sede San Isidro') }}
+              </p>
+              <p class="text-[12px] text-on-surface-variant/80 font-black tracking-widest uppercase">
+                Periodo: <span class="text-[#ffbd0a] font-black">{{ statsTimeRange() }}</span>
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Row 2: Charts and Distributions -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          
+          <!-- Column: popular products bar chart -->
+          <div class="col-span-1 lg:col-span-7 bg-surface-container/80 rounded-2xl p-8 border border-white/5 shadow-xl flex flex-col justify-between backdrop-blur-sm relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-white/[0.01] to-transparent pointer-events-none"></div>
+            
+            <div class="flex justify-between items-center mb-6 relative z-10">
+              <div>
+                <h3 class="text-lg font-black tracking-tight text-white flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[#ffbd0a] !text-[20px]">trending_up</span>
+                  Platos Más Vendidos
+                </h3>
+                <p class="text-[12px] text-on-surface-variant mt-0.5 font-medium">Volumen de ventas estimadas por unidad</p>
+              </div>
+              <span class="text-[11px] font-bold text-white/50 bg-white/5 border border-white/5 px-3 py-1 rounded">
+                Unidades
+              </span>
+            </div>
+
+            <div class="space-y-5 relative z-10">
+              @for (product of statsTopProducts(); track product.name) {
+                <div class="space-y-1.5 group/bar cursor-pointer">
+                  <div class="flex justify-between items-center text-[13.5px] font-bold">
+                    <span class="text-white/90 group-hover/bar:text-[#ffbd0a] transition-colors truncate max-w-[220px]">{{ product.name }}</span>
+                    <span class="text-[#ffbd0a] font-black">{{ product.qty }}u <span class="text-white/40 font-medium text-[12px]">({{ product.total }})</span></span>
+                  </div>
+                  <div class="w-full bg-white/[0.03] rounded-full h-3 border border-white/5 overflow-hidden">
+                    <div 
+                      class="bg-gradient-to-r from-[#ffbd0a]/80 to-[#ffbd0a] h-full rounded-full transition-all duration-1000"
+                      [style.width.%]="product.pct"></div>
+                  </div>
+                </div>
+              }
+              @empty {
+                <div class="text-center py-12 text-white/40 space-y-2">
+                  <span class="material-symbols-outlined !text-[36px]">block</span>
+                  <p class="text-[14px] font-medium">No hay registros de ventas para esta sucursal.</p>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Column: Category breakdown pie/donut stats -->
+          <div class="col-span-1 lg:col-span-5 bg-surface-container/80 rounded-2xl p-8 border border-white/5 shadow-xl flex flex-col backdrop-blur-sm relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-white/[0.01] to-transparent pointer-events-none"></div>
+            
+            <div class="mb-6 relative z-10">
+              <h3 class="text-lg font-black tracking-tight text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-[#3c40c6] !text-[20px]">pie_chart</span>
+                Canal / Grupo Categoría
+              </h3>
+              <p class="text-[12px] text-on-surface-variant mt-0.5 font-medium">Participación de ingresos estimado</p>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center gap-5 relative z-10">
+              @for (cat of statsCategoryDistribution(); track cat.name) {
+                <div class="bg-[#15181c]/50 border border-white/[0.03] rounded-xl p-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
+                  <div class="flex items-center gap-3">
+                    <div class="w-2.5 h-10 rounded" [style.background-color]="cat.color"></div>
+                    <div>
+                      <p class="text-[14px] font-black text-white">{{ cat.name }}</p>
+                      <p class="text-[12px] text-[#ffbd0a] font-bold">{{ cat.value }}</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-lg font-black text-white/95">{{ cat.pct }}%</span>
+                  </div>
+                </div>
+              }
+              @empty {
+                <div class="text-center py-12 text-white/40 space-y-2">
+                  <span class="material-symbols-outlined !text-[36px]">block</span>
+                  <p class="text-[14px] font-medium">Sucursal sin participación de ingresos activa.</p>
+                </div>
+              }
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Row 3: Live Transactions Stream -->
+        <div class="bg-surface-container/80 rounded-2xl border border-white/5 shadow-xl overflow-hidden backdrop-blur-sm">
+          <div class="px-8 py-5 border-b border-white/5 flex items-center justify-between bg-surface-container/40">
+            <div>
+              <h3 class="text-base font-black tracking-tight flex items-center gap-2">
+                <span class="material-symbols-outlined text-emerald-400 !text-[20px]">stream</span>
+                Transacciones Recientes en Vivo
+              </h3>
+              <p class="text-[11.5px] text-on-surface-variant font-medium mt-0.5">Historial de tickets cobrados y despachados en los últimos minutos</p>
+            </div>
+            <span class="inline-flex items-center gap-1.5 text-[11px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full uppercase tracking-wider animate-pulse">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              En Vivo
+            </span>
+          </div>
+          
+          <div class="overflow-x-auto subtle-scrollbar">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="bg-surface-container-low/30 text-[11px] uppercase tracking-wider text-white/40 font-bold border-b border-white/5">
+                  <th class="px-8 py-4.5">Ticket ID</th>
+                  <th class="px-8 py-4.5">Sucursal</th>
+                  <th class="px-8 py-4.5">Producto Vendido</th>
+                  <th class="px-8 py-4.5 text-right">Monto</th>
+                  <th class="px-8 py-4.5 text-center">Hora</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/[0.03]">
+                @for (tx of statsRecentTransactions(); track tx.id) {
+                  <tr class="hover:bg-white/[0.02] transition-colors group animate-[fadeIn_0.5s_ease-out]">
+                    <td class="px-8 py-4.5 font-black text-[13.5px] text-[#ffbd0a]">
+                      #{{ tx.id }}
+                    </td>
+                    <td class="px-8 py-4.5 font-bold text-[13.5px] text-white/80">
+                      {{ tx.sedeName }}
+                    </td>
+                    <td class="px-8 py-4.5 text-[13.5px] font-bold text-white/95">
+                      {{ tx.product }}
+                    </td>
+                    <td class="px-8 py-4.5 font-black text-[14px] text-right text-emerald-400">
+                      S/. {{ tx.amount | number:'1.2-2' }}
+                    </td>
+                    <td class="px-8 py-4.5 text-center text-[12px] font-bold text-white/40">
+                      {{ tx.time }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .subtle-scrollbar::-webkit-scrollbar { width: 6px; }
+  .subtle-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .subtle-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 8px; }
+  .subtle-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+  .custom-scrollbar-hide::-webkit-scrollbar { display: none; }
+  .custom-scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+</style>

@@ -1,0 +1,76 @@
+/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", system-ui, sans-serif;
+  
+  --color-surface: #131517;
+  --color-surface-dim: #131517;
+  --color-surface-bright: #363a3c;
+  --color-surface-container-lowest: #0f1113;
+  --color-surface-container-low: #171a1d;
+  --color-surface-container: #1d2229;
+  --color-surface-container-high: #262c33;
+  --color-surface-container-highest: #30373f;
+  --color-on-surface: #f1f3f5;
+  --color-on-surface-variant: #b0bac5;
+  --color-inverse-surface: #f1f3f5;
+  --color-inverse-on-surface: #1d2229;
+  --color-outline: #727d88;
+  --color-outline-variant: #40474f;
+  --color-surface-tint: #ffbd0a;
+  --color-primary: #ffbd0a;
+  --color-on-primary: #211800;
+  --color-primary-container: #ffbd0a;
+  --color-on-primary-container: #211800;
+  --color-inverse-primary: #8a6500;
+  --color-secondary: #90a4ae;
+  --color-on-secondary: #001e2c;
+  --color-secondary-container: #123242;
+  --color-on-secondary-container: #c4d7e2;
+  --color-error: #ffb4a9;
+  --color-on-error: #680003;
+  --color-error-container: #930006;
+  --color-on-error-container: #ffdad4;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+  font-family: var(--font-sans);
+}
+
+.material-symbols-outlined {
+   font-variant: normal;
+   text-transform: none;
+   -webkit-font-smoothing: antialiased;
+   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Rotisserie Pro",
+  "description": "Premium real-time restaurant management interface with Admin Terminal, Kitchen KDS Kanban board, and POS features.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
