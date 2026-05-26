@@ -253,6 +253,10 @@ export class ApiService {
     return this.http.post<void>(`${API}/notifications/read-all`, {});
   }
 
+  logout(): Observable<any> {
+    return this.http.post(`${API}/auth/logout`, {});
+  }
+
   getDashboard(sedeId?: string): Observable<DashboardData> {
     let params: any = {};
     if (sedeId) params.sede_id = sedeId;

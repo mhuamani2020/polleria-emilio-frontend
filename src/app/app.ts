@@ -693,6 +693,12 @@ export class App {
     this.selectSedeById(target.value);
   }
 
+  handleLogout() {
+    this.api.logout().subscribe({ error: () => {} });
+    this.auth.clear();
+    this.currentView.set('login');
+  }
+
   selectSedeById(id: string) {
     const found = this.sedes().find(s => s.id === id);
     if (found) {

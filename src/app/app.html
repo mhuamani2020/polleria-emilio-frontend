@@ -103,7 +103,7 @@
         }
         
         <div class="flex flex-col gap-1">
-          <button (click)="changeView('login')" class="w-full h-11 flex items-center justify-start gap-5 px-3 rounded-lg text-on-surface-variant hover:text-error hover:bg-error/5 transition-all group">
+          <button (click)="handleLogout()" class="w-full h-11 flex items-center justify-start gap-5 px-3 rounded-lg text-on-surface-variant hover:text-error hover:bg-error/5 transition-all group">
             <span class="material-symbols-outlined !text-[22px] group-hover:translate-x-1 transition-transform shrink-0">logout</span>
             <span class="truncate opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 text-[14px] font-bold">Logout</span>
           </button>
@@ -280,7 +280,7 @@
         </nav>
         
         <div class="px-4 py-4 border-t border-white/5 flex flex-col gap-1">
-          <button (click)="changeView('login')" class="flex items-center gap-3 transition-colors text-on-surface-variant hover:text-on-surface font-bold text-[14px] px-4 py-2.5 hover:bg-white/5 rounded-lg w-full text-left">
+          <button (click)="handleLogout()" class="flex items-center gap-3 transition-colors text-on-surface-variant hover:text-on-surface font-bold text-[14px] px-4 py-2.5 hover:bg-white/5 rounded-lg w-full text-left">
             <span class="material-symbols-outlined !text-[20px]">logout</span>
             <span>Logout</span>
           </button>
@@ -580,7 +580,9 @@
       <div class="flex items-center gap-8">
         <button (click)="changeView('pos')" class="text-white/60 hover:text-white text-[14px] font-bold transition-colors">POS Terminal</button>
         <button class="text-[#ffbd0a] text-[14px] font-bold border-b-[3px] border-[#ffbd0a] pb-[3px]">Kitchen KDS</button>
+        @if (currentUserRole() === 'admin') {
         <button (click)="changeView('dashboard')" class="text-white/60 hover:text-white text-[14px] font-bold transition-colors">Dashboard</button>
+        }
       </div>
 
       <!-- Right Icons -->
