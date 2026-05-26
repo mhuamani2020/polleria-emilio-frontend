@@ -126,10 +126,22 @@ export class App {
     if (!session || !this.auth.accessToken) return;
 
     try {
-      await firstValueFrom(this.api.getMe());
+      const user = await firstValueFrom(this.api.getMe());
       this.currentUserRole.set(session.role);
       this.currentUsername.set(session.username);
-      this.selectSedeById(session.sedeId);
+
+      const sedesData = await firstValueFrom(this.api.getSedes());
+      this.sedes.set(sedesData.map(s => ({
+        id: s.sede_id,
+        name: s.name,
+        address: s.address,
+        phone: s.phone,
+        manager: s.manager,
+        status: s.status as 'Activa' | 'Inactiva',
+        sales: `S/. ${s.sales.toFixed(2)}`,
+      })));
+      this.selectSedeById(user.sede_id);
+
       this.ws.connect(this.auth.accessToken);
 
       if (session.role === 'admin') this.changeView('dashboard');
@@ -448,7 +460,10 @@ export class App {
     this.mobileSidebarOpen.set(false);
     if (view === 'dashboard') { this.loadDashboard(); this.loadNotifications(); }
     if (view === 'sedes') this.loadSedes();
-    if (view === 'pos') this.loadProducts();
+    if (view === 'pos') {
+      if (this.sedes().length === 0) this.loadSedes();
+      this.loadProducts();
+    }
     if (view === 'inventory') { this.loadSedes(); this.loadInventory(); }
     if (view === 'kds') {
       this.loadKdsTickets();
@@ -681,7 +696,19 @@ export class App {
         });
         this.currentUserRole.set(user.role);
         this.currentUsername.set(user.username);
+
+        const sedesData = await firstValueFrom(this.api.getSedes());
+        this.sedes.set(sedesData.map(s => ({
+          id: s.sede_id,
+          name: s.name,
+          address: s.address,
+          phone: s.phone,
+          manager: s.manager,
+          status: s.status as 'Activa' | 'Inactiva',
+          sales: `S/. ${s.sales.toFixed(2)}`,
+        })));
         this.selectSedeById(user.sede_id);
+
         this.isLoading.set(false);
         this.addNotification('Inicio de Sesión Exitoso ✔️', `Bienvenido ${user.username}`, 'success');
         if (user.role === 'admin') {
