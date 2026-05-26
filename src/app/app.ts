@@ -615,9 +615,11 @@ export class App {
     });
   }
 
-  handleLogin(creds: { username: string; password: string; role: 'admin' | 'cajero' | 'mesero'; sedeId: string; displayName: string }) {
+  handleLogin(creds: { username: string; password: string; role: 'admin' | 'cajero' | 'mesero'; sedeId: string; displayName: string }, force = false) {
     this.isLoading.set(true);
-    this.api.login({ username: creds.username, password: creds.password }).subscribe({
+    const body: Record<string, unknown> = { username: creds.username, password: creds.password };
+    if (force) body.force = true;
+    this.api.login(body as any).subscribe({
       next: (tokens) => {
         this.auth.setTokens(tokens.access_token, tokens.refresh_token);
         this.api.getMe().subscribe({
@@ -662,7 +664,9 @@ export class App {
         this.isLoading.set(false);
         const detail = err.error?.detail || err.message || 'Error de conexión';
         if (err.status === 409 && err.error?.session) {
-          this.addNotification('Sesión Activa ⚠️', `${detail}. Cierra la sesión anterior e intenta de nuevo.`, 'alert');
+          if (confirm('Ya tienes una sesión activa en otro dispositivo. ¿Deseas cerrarla e iniciar sesión aquí?')) {
+            this.handleLogin(creds, true);
+          }
         } else {
           this.addNotification('Error de Login ❌', detail, 'alert');
         }
