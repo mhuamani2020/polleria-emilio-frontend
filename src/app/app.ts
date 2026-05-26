@@ -121,6 +121,10 @@ export class App {
   constructor() {
     this.ws.messages.subscribe(msg => this.handleWsMessage(msg));
     this.restoreSession();
+
+    setInterval(() => {
+      if (this.currentView() === 'kds') this.loadKdsTickets();
+    }, 5000);
   }
 
   private async restoreSession() {
