@@ -34,6 +34,7 @@ export interface Product {
   description?: string;
   price: number;
   icon?: string;
+  image_url?: string;
   category_id: string;
   is_combo: boolean;
   is_active: boolean;

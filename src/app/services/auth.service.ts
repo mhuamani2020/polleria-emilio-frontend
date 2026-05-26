@@ -14,33 +14,41 @@ export class AuthService {
 
   currentSession = signal<UserSession | null>(this.loadSession());
 
+  private ss(): Storage | null {
+    try {
+      return typeof window !== 'undefined' ? window.sessionStorage : null;
+    } catch {
+      return null;
+    }
+  }
+
   get accessToken(): string | null {
-    return sessionStorage.getItem(this.ACCESS_KEY);
+    return this.ss()?.getItem(this.ACCESS_KEY) ?? null;
   }
 
   get refreshToken(): string | null {
-    return sessionStorage.getItem(this.REFRESH_KEY);
+    return this.ss()?.getItem(this.REFRESH_KEY) ?? null;
   }
 
   setTokens(access: string, refresh: string) {
-    sessionStorage.setItem(this.ACCESS_KEY, access);
-    sessionStorage.setItem(this.REFRESH_KEY, refresh);
+    this.ss()?.setItem(this.ACCESS_KEY, access);
+    this.ss()?.setItem(this.REFRESH_KEY, refresh);
   }
 
   setSession(session: UserSession) {
     this.currentSession.set(session);
-    sessionStorage.setItem('polleria_session', JSON.stringify(session));
+    this.ss()?.setItem('polleria_session', JSON.stringify(session));
   }
 
   clear() {
-    sessionStorage.removeItem(this.ACCESS_KEY);
-    sessionStorage.removeItem(this.REFRESH_KEY);
-    sessionStorage.removeItem('polleria_session');
+    this.ss()?.removeItem(this.ACCESS_KEY);
+    this.ss()?.removeItem(this.REFRESH_KEY);
+    this.ss()?.removeItem('polleria_session');
     this.currentSession.set(null);
   }
 
   private loadSession(): UserSession | null {
-    const raw = sessionStorage.getItem('polleria_session');
+    const raw = this.ss()?.getItem('polleria_session');
     return raw ? JSON.parse(raw) : null;
   }
 }

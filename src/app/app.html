@@ -14,7 +14,7 @@
             @if (currentUserRole() === 'admin') {
               <div class="relative mt-1">
                 <select 
-                  [value]="currentSede().id" 
+                  [value]="currentSede()?.id" 
                   (change)="onSedeChange($event)"
                   class="w-full bg-[#1c1e22] border border-white/10 rounded-md py-1.5 pl-2.5 pr-8 text-[14px] font-black text-[#ffbd0a] hover:border-[#ffbd0a]/40 focus:outline-none appearance-none cursor-pointer leading-none">
                   @for (s of sedes(); track s.id) {
@@ -26,7 +26,7 @@
             } @else {
               <div class="text-[14px] font-extrabold text-[#ffbd0a] mt-1.5 flex items-center gap-1.5">
                 <span class="material-symbols-outlined !text-[16px] text-primary">location_on</span>
-                <span class="truncate max-w-[150px]">{{ currentSede().name }}</span>
+                <span class="truncate max-w-[150px]">{{ currentSede()?.name }}</span>
               </div>
             }
           </div>
@@ -112,7 +112,7 @@
           <button (click)="toggleMobileSidebar()" class="w-10 h-10 -ml-2 flex items-center justify-center rounded text-[#ffbd0a] hover:bg-white/5 active:scale-95 transition-all outline-none">
             <span class="material-symbols-outlined !text-[24px]">menu</span>
           </button>
-          <span class="text-md font-extrabold text-[#ffbd0a] tracking-tight">{{ currentSede().name }}</span>
+          <span class="text-md font-extrabold text-[#ffbd0a] tracking-tight">{{ currentSede()?.name }}</span>
         </div>
         <div class="text-[11px] font-bold text-[#ffbd0a] bg-primary/10 border border-[#ffbd0a]/20 px-3 py-1 rounded">
           @switch (currentView()) {
@@ -195,7 +195,7 @@
               <span class="material-symbols-outlined !text-[20px]">restaurant</span>
             </div>
             <div>
-              <h1 class="text-[15px] leading-tight font-black text-[#ffbd0a] tracking-tight">{{ currentSede().name }}</h1>
+              <h1 class="text-[15px] leading-tight font-black text-[#ffbd0a] tracking-tight">{{ currentSede()?.name }}</h1>
               <p class="text-[9px] font-black text-on-surface-variant tracking-wider uppercase opacity-85 mt-0.5">{{ currentUsername() }}</p>
             </div>
           </div>
@@ -514,13 +514,13 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-white/5">
-                @for (item of inventory; track item.productName) {
+                @for (item of inventory; track item.product) {
                   <tr class="hover:bg-white/[0.03] transition-colors group">
                      <td class="px-8 py-5 flex items-center gap-5">
                        <div class="w-12 h-12 rounded-md bg-surface-container-highest border border-white/5 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-surface-variant transition-colors">
                          <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors !text-[26px]">{{item.icon}}</span>
                        </div>
-                       <span class="font-bold text-[16px] text-on-surface group-hover:text-primary transition-colors">{{item.productName}}</span>
+                       <span class="font-bold text-[16px] text-on-surface group-hover:text-primary transition-colors">{{item.product}}</span>
                      </td>
                      <td class="px-8 py-5 text-center">
                        <span class="px-3.5 py-1.5 bg-surface-container-highest text-[13px] text-on-surface-variant font-bold rounded-lg block w-max mx-auto shadow-sm tracking-wide">{{item.ratio}}</span>
@@ -1579,11 +1579,11 @@
           <div class="grid grid-cols-1 gap-6">
             @for (s of sedes(); track s.id) {
               <div 
-                [class]="currentSede().id === s.id ? 'border-[#ffbd0a]/40 bg-[#1e232b] ring-2 ring-[#ffbd0a]/10 shadow-[0_20px_60px_rgba(255,189,10,0.15)]' : 'border-white/5 bg-[#1d2229] shadow-lg'"
+                [class]="currentSede()?.id === s.id ? 'border-[#ffbd0a]/40 bg-[#1e232b] ring-2 ring-[#ffbd0a]/10 shadow-[0_20px_60px_rgba(255,189,10,0.15)]' : 'border-white/5 bg-[#1d2229] shadow-lg'"
                 class="border rounded-xl p-6 md:p-8 flex flex-col transition-all duration-300 hover:shadow-2xl relative overflow-hidden group gap-6">
                 
                 <!-- Radiant Background Effect -->
-                @if (currentSede().id === s.id) {
+                @if (currentSede()?.id === s.id) {
                   <div class="absolute -right-20 -top-20 w-80 h-80 bg-[#ffbd0a]/5 rounded-full blur-[100px] pointer-events-none group-hover:bg-[#ffbd0a]/10 transition-colors duration-700"></div>
                 }
 
@@ -1591,7 +1591,7 @@
                   <!-- Header Row: Store info + Status Badge -->
                   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div class="flex items-center gap-4">
-                      <div [class]="currentSede().id === s.id ? 'bg-[#ffbd0a]/20 text-[#ffbd0a] shadow-[0_0_20px_rgba(255,189,10,0.2)]' : 'bg-[#242931] text-on-surface-variant'" class="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center border border-white/5 transition-all group-hover:rotate-6 shrink-0">
+                      <div [class]="currentSede()?.id === s.id ? 'bg-[#ffbd0a]/20 text-[#ffbd0a] shadow-[0_0_20px_rgba(255,189,10,0.2)]' : 'bg-[#242931] text-on-surface-variant'" class="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center border border-white/5 transition-all group-hover:rotate-6 shrink-0">
                         <span class="material-symbols-outlined !text-[24px] md:!text-[28px] font-bold">storefront</span>
                       </div>
                       <div class="min-w-0">
@@ -1654,7 +1654,7 @@
                   <!-- Footer Actions: Status message + Quick Action -->
                   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
                     <div class="text-[12px] text-on-surface-variant/70 italic">
-                      @if (currentSede().id === s.id) {
+                      @if (currentSede()?.id === s.id) {
                         <span class="text-primary font-black flex items-center gap-1.5">
                           <span class="material-symbols-outlined !text-[16px]">check_circle</span> Esta es tu sede de operaciones actual
                         </span>
@@ -1672,7 +1672,7 @@
                         <span>Editar</span>
                       </button>
 
-                      @if (currentSede().id === s.id) {
+                      @if (currentSede()?.id === s.id) {
                         <div class="flex-1 sm:min-w-[150px] bg-[#ffbd0a]/10 border border-[#ffbd0a]/20 text-[#ffbd0a] py-3.5 px-5 rounded-xl text-[13px] font-black flex items-center justify-center gap-2.5 shadow-[0_10px_30px_rgba(255,189,10,0.1)]">
                           <span class="material-symbols-outlined !text-[18px] animate-pulse">verified_user</span>
                           <span>SEDE ACTIVA</span>

@@ -201,19 +201,7 @@ export class App {
   });
 
   // Category breakdown
-  statsCategoryDistribution = computed(() => {
-    const filter = this.statsSedeFilter();
-    const rev = this.statsComputedRevenue();
-    if (filter === '3') {
-      return [];
-    }
-    return [
-      { name: 'Pollos', pct: 48, value: `S/. ${(rev * 0.48).toFixed(2)}`, color: '#ffbd0a' },
-      { name: 'Combos', pct: 28, value: `S/. ${(rev * 0.28).toFixed(2)}`, color: '#3c40c6' },
-      { name: 'Mostritos', pct: 16, value: `S/. ${(rev * 0.16).toFixed(2)}`, color: '#ff5e57' },
-      { name: 'Bebidas', pct: 8, value: `S/. ${(rev * 0.08).toFixed(2)}`, color: '#10ac84' }
-    ];
-  });
+  statsCategoryDistribution = signal<{ name: string; pct: number; value: string; color: string }[]>([]);
 
   // Top Products
   statsTopProducts = computed(() => {
@@ -802,7 +790,7 @@ export class App {
 
   saveStaff(data: { name: string; dni: string; phone: string; role: string; shift: string; status: 'Activo' | 'Inactivo' }) {
     const editMode = this.staffToEdit();
-    const roleMap: Record<string, string> = { 'Administrador': 'admin', 'Cajero': 'cajero', 'Mesero': 'mesero' };
+    const roleMap: Record<string, 'admin' | 'cajero' | 'mesero'> = { 'Administrador': 'admin', 'Cajero': 'cajero', 'Mesero': 'mesero' };
     const backendRole = roleMap[data.role] || 'mesero';
     const isActive = data.status === 'Activo';
 
