@@ -464,7 +464,7 @@ export class App {
     const role = this.currentUserRole();
     const allowed: Record<string, ViewType[]> = {
       admin: [
-        'dashboard', 'pos', 'kds', 'inventory', 'inventory-edit',
+        'dashboard', 'kds', 'inventory', 'inventory-edit',
         'merma-register', 'combo-register', 'staff-list', 'staff-register',
         'sedes', 'sede-register', 'stats', 'login',
       ],

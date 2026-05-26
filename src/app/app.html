@@ -34,7 +34,7 @@
       </div>
 
       <nav class="flex-1 px-4 group-hover/sidebar:px-5 py-6 space-y-2 overflow-y-auto subtle-scrollbar transition-all">
-        @if (currentUserRole() === 'admin' || currentUserRole() === 'cajero') {
+        @if (currentUserRole() === 'cajero') {
         <button 
           (click)="changeView('pos')"
           [class]="currentView() === 'pos' ? 'bg-primary text-on-primary font-black shadow-[0_4px_15px_rgba(255,179,0,0.3)]' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
@@ -225,7 +225,7 @@
         </div>
 
         <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
-          @if (currentUserRole() === 'admin' || currentUserRole() === 'cajero') {
+          @if (currentUserRole() === 'cajero') {
           <button 
             (click)="changeView('pos')"
             [class]="currentView() === 'pos' ? 'bg-primary text-on-primary font-bold shadow-sm' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
@@ -590,7 +590,7 @@
 
       <!-- Center Nav -->
       <div class="flex items-center gap-8">
-        @if (currentUserRole() !== 'mesero') {
+        @if (currentUserRole() === 'cajero') {
         <button (click)="changeView('pos')" class="text-white/60 hover:text-white text-[14px] font-bold transition-colors">POS Terminal</button>
         }
         <button class="text-[#ffbd0a] text-[14px] font-bold border-b-[3px] border-[#ffbd0a] pb-[3px]">Kitchen KDS</button>
