@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, computed, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -508,6 +508,12 @@ export class App {
     this.showNotificationsDropdown.set(false);
   }
 
+  @HostListener('document:click')
+  onDocClick() {
+    this.closeNotificationsDropdown();
+    this.closeUserMenu();
+  }
+
   markAllAsRead() {
     this.notifications.update(list => list.map(n => ({ ...n, read: true })));
     this.api.markAllNotificationsRead().subscribe();
@@ -829,10 +835,11 @@ export class App {
 
   handleLogout() {
     this.closeUserMenu();
+    this.closeNotificationsDropdown();
     this.ws.disconnect();
-    this.api.logout().subscribe({ error: () => {} });
     this.auth.clear();
     this.currentView.set('login');
+    this.api.logout().subscribe({ error: () => {} });
   }
 
   private handleWsMessage(msg: { type: string; data: any }) {
@@ -854,6 +861,12 @@ export class App {
       case 'inventory_critical':
         this.addNotification('Stock Crítico ⚠️', `El stock de un insumo está en nivel crítico.`, 'alert');
         if (this.currentView() === 'inventory') this.loadInventory();
+        break;
+      case 'ws_error':
+        this.addNotification('WebSocket ❌', 'Error de conexión en tiempo real. Los cambios se verán al recargar.', 'alert');
+        break;
+      case 'ws_connected':
+        console.log('[App] WebSocket conectado');
         break;
     }
   }

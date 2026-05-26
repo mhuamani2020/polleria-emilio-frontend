@@ -20,7 +20,14 @@ export class WebSocketService {
     this.disconnect();
     if (!this.token) return;
 
-    const host = environment.wsUrl || window.location.host;
+    let host = environment.wsUrl;
+    if (!host) {
+      if (environment.apiUrl.startsWith('http')) {
+        host = environment.apiUrl.replace(/^https?:\/\//, '');
+      } else {
+        host = window.location.host;
+      }
+    }
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     this.ws = new WebSocket(`${protocol}//${host}/ws?token=${this.token}`);
 
@@ -35,8 +42,15 @@ export class WebSocketService {
       this.reconnectTimer = setTimeout(() => this.doConnect(), 3000);
     };
 
-    this.ws.onerror = () => {
+    this.ws.onerror = (err) => {
+      console.error('[WS] Error de conexión. Verifica que WS_URL esté configurado en producción.', err);
+      this.messages.next({ type: 'ws_error', data: { error: 'Error de conexión WebSocket' }, event_id: 0 });
       this.ws?.close();
+    };
+
+    this.ws.onopen = () => {
+      console.log('[WS] Conectado');
+      this.messages.next({ type: 'ws_connected', data: {}, event_id: 0 });
     };
   }
 
