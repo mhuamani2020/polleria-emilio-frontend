@@ -663,6 +663,8 @@ export class App {
         this.addNotification('Inicio de Sesión Exitoso ✔️', `Bienvenido ${user.username}`, 'success');
         if (user.role === 'admin') {
           this.changeView('dashboard');
+        } else if (user.role === 'mesero') {
+          this.changeView('kds');
         } else {
           this.changeView('pos');
         }
@@ -679,6 +681,8 @@ export class App {
         this.selectSedeById(creds.sedeId);
         if (creds.role === 'admin') {
           this.changeView('dashboard');
+        } else if (creds.role === 'mesero') {
+          this.changeView('kds');
         } else {
           this.changeView('pos');
         }
