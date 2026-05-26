@@ -593,6 +593,7 @@
 
       <!-- Right Icons -->
       <div class="flex items-center gap-6 text-[#f1f3f5]">
+        @if (currentUserRole() !== 'mesero') {
         <div class="relative">
           <button (click)="toggleNotifications($event)" class="hover:text-[#ffbd0a] transition-colors relative cursor-pointer flex items-center justify-center h-[28px] w-[28px]">
             <span class="material-symbols-outlined !text-[22px]">notifications</span>
@@ -698,6 +699,7 @@
             </div>
           }
         </div>
+        }
         <button (click)="handleLogout()" class="hover:text-[#ffbd0a] transition-colors cursor-pointer"><span class="material-symbols-outlined !text-[22px]">account_circle</span></button>
         <button class="hover:text-[#ffbd0a] transition-colors"><span class="material-symbols-outlined !text-[22px]">settings</span></button>
       </div>

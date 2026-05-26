@@ -118,6 +118,26 @@ export class App {
 
   constructor() {
     this.ws.messages.subscribe(msg => this.handleWsMessage(msg));
+    this.restoreSession();
+  }
+
+  private async restoreSession() {
+    const session = this.auth.currentSession();
+    if (!session || !this.auth.accessToken) return;
+
+    try {
+      await firstValueFrom(this.api.getMe());
+      this.currentUserRole.set(session.role);
+      this.currentUsername.set(session.username);
+      this.selectSedeById(session.sedeId);
+      this.ws.connect(this.auth.accessToken);
+
+      if (session.role === 'admin') this.changeView('dashboard');
+      else if (session.role === 'mesero') this.changeView('kds');
+      else this.changeView('pos');
+    } catch {
+      // Token expirado o inválido → se queda en login
+    }
   }
 
   currentView = signal<ViewType>('login');
@@ -430,7 +450,10 @@ export class App {
     if (view === 'sedes') this.loadSedes();
     if (view === 'pos') this.loadProducts();
     if (view === 'inventory') { this.loadSedes(); this.loadInventory(); }
-    if (view === 'kds') { this.loadKdsTickets(); this.loadNotifications(); }
+    if (view === 'kds') {
+      this.loadKdsTickets();
+      if (this.currentUserRole() !== 'mesero') this.loadNotifications();
+    }
     if (view === 'staff-list') this.loadStaff();
     if (view === 'stats') this.loadDashboard();
   }
