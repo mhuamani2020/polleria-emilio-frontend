@@ -663,7 +663,7 @@ export class App {
       error: (err) => {
         this.isLoading.set(false);
         const detail = err.error?.detail || err.message || 'Error de conexión';
-        if (err.status === 409 && err.error?.session) {
+        if (err.status === 409) {
           if (confirm('Ya tienes una sesión activa en otro dispositivo. ¿Deseas cerrarla e iniciar sesión aquí?')) {
             this.handleLogin(creds, true);
           }
