@@ -14,7 +14,7 @@ import { ConfirmService } from './services/confirm.service';
 import { WebSocketService } from './services/websocket.service';
 import { ConfirmModalComponent } from './components/confirm-modal.component';
 
-type ViewType = 'dashboard' | 'pos' | 'kds' | 'inventory' | 'customer-display' | 'inventory-edit' | 'staff-register' | 'staff-list' | 'login' | 'merma-register' | 'combo-register' | 'sedes' | 'sede-register' | 'stats';
+type ViewType = 'dashboard' | 'pos' | 'kds' | 'inventory' | 'customer-display' | 'inventory-edit' | 'staff-register' | 'staff-list' | 'login' | 'merma-register' | 'combo-register' | 'sedes' | 'sede-register' | 'stats' | 'loading';
 
 
 interface OrderItem {
@@ -123,12 +123,16 @@ export class App {
 
   private async restoreSession() {
     const session = this.auth.currentSession();
-    if (!session || !this.auth.accessToken) return;
+    if (!session || !this.auth.accessToken) {
+      this.currentView.set('login');
+      return;
+    }
 
     try {
       const user = await firstValueFrom(this.api.getMe());
       this.currentUserRole.set(session.role);
       this.currentUsername.set(session.username);
+      this.currentUserDisplayName.set(user.display_name || session.username);
 
       const sedesData = await firstValueFrom(this.api.getSedes());
       this.sedes.set(sedesData.map(s => ({
@@ -148,11 +152,11 @@ export class App {
       else if (session.role === 'mesero') this.changeView('kds');
       else this.changeView('pos');
     } catch {
-      // Token expirado o inválido → se queda en login
+      this.currentView.set('login');
     }
   }
 
-  currentView = signal<ViewType>('login');
+  currentView = signal<ViewType>('loading');
   isLoading = signal(false);
 
   // Notifications & Toasts system
@@ -164,9 +168,13 @@ export class App {
   unreadNotificationsCount = computed(() => {
     return this.notifications().filter(n => !n.read).length;
   });
-  showModal = signal<'none' | 'order' | 'stock' | 'staff' | 'staff-update' | 'staff-delete' | 'sede'>('none');
+  showModal = signal<'none' | 'order' | 'stock' | 'staff' | 'staff-update' | 'staff-delete' | 'sede' | 'password'>('none');
+  passwordError = signal<string>('');
+  passwordLoading = signal<boolean>(false);
   currentUserRole = signal<'admin' | 'cajero' | 'mesero'>('admin');
   currentUsername = signal<string>('Invitado');
+  currentUserDisplayName = signal<string>('');
+  showUserMenu = signal<boolean>(false);
 
   // Stats Data
   statsTimeRange = signal<'Hoy' | 'Semana' | 'Mes'>('Hoy');
@@ -442,6 +450,10 @@ export class App {
   mobileSidebarOpen = signal(false);
 
   changeView(view: ViewType) {
+    if (view === 'loading') {
+      this.currentView.set(view);
+      return;
+    }
     const role = this.currentUserRole();
     const allowed: Record<string, ViewType[]> = {
       admin: [
@@ -615,6 +627,8 @@ export class App {
     this.showModal.set('none');
     this.pendingStaff.set(null);
     this.staffToDeleteId.set(null);
+    this.passwordError.set('');
+    this.passwordLoading.set(false);
   }
 
   confirmSaveStaff(data: { name: string; dni: string; phone: string; role: string; shift: string; status: 'Activo' | 'Inactivo' }) {
@@ -696,6 +710,7 @@ export class App {
         });
         this.currentUserRole.set(user.role);
         this.currentUsername.set(user.username);
+        this.currentUserDisplayName.set(user.display_name || user.username);
 
         const sedesData = await firstValueFrom(this.api.getSedes());
         this.sedes.set(sedesData.map(s => ({
@@ -762,7 +777,57 @@ export class App {
     this.selectSedeById(target.value);
   }
 
+  changePasswordSubmit(event: Event) {
+    event.preventDefault();
+    this.passwordError.set('');
+    const form = event.target as HTMLFormElement;
+    const current = (form.elements.namedItem('current_password') as HTMLInputElement).value;
+    const newPass = (form.elements.namedItem('new_password') as HTMLInputElement).value;
+    const confirm = (form.elements.namedItem('confirm_password') as HTMLInputElement).value;
+
+    if (!current || !newPass || !confirm) {
+      this.passwordError.set('Todos los campos son obligatorios');
+      return;
+    }
+    if (newPass.length < 8) {
+      this.passwordError.set('La nueva contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+    if (newPass !== confirm) {
+      this.passwordError.set('Las contraseñas nuevas no coinciden');
+      return;
+    }
+
+    this.passwordLoading.set(true);
+    this.handlePasswordChange({ current_password: current, new_password: newPass }).then(ok => {
+      this.passwordLoading.set(false);
+      if (ok) this.closeModal();
+    });
+  }
+
+  toggleUserMenu(event?: Event) {
+    if (event) event.stopPropagation();
+    this.showUserMenu.update(v => !v);
+  }
+
+  closeUserMenu() {
+    this.showUserMenu.set(false);
+  }
+
+  async handlePasswordChange(data: { current_password: string; new_password: string }): Promise<boolean> {
+    try {
+      await firstValueFrom(this.api.changePassword(data));
+      this.addNotification('Contraseña Actualizada ✔️', 'Tu contraseña fue cambiada exitosamente.', 'success');
+      return true;
+    } catch (err: any) {
+      const detail = err.error?.detail || 'Error al cambiar contraseña';
+      this.addNotification('Error ❌', detail, 'alert');
+      return false;
+    }
+  }
+
   handleLogout() {
+    this.closeUserMenu();
     this.ws.disconnect();
     this.api.logout().subscribe({ error: () => {} });
     this.auth.clear();

@@ -189,6 +189,14 @@
         @case ('stats') {
           <ng-container *ngTemplateOutlet="statsTemplate"></ng-container>
         }
+        @case ('loading') {
+          <div class="flex items-center justify-center h-screen w-full bg-[#111315]">
+            <div class="flex flex-col items-center gap-4">
+              <span class="material-symbols-outlined text-[#ffbd0a] !text-[48px] animate-spin">sync</span>
+              <p class="text-[15px] font-bold text-on-surface-variant animate-pulse">Restaurando sesión...</p>
+            </div>
+          </div>
+        }
       }
     </main>
   </div>
@@ -700,10 +708,46 @@
           }
         </div>
         }
-        <button (click)="handleLogout()" class="hover:text-[#ffbd0a] transition-colors cursor-pointer"><span class="material-symbols-outlined !text-[22px]">account_circle</span></button>
-        <button class="hover:text-[#ffbd0a] transition-colors"><span class="material-symbols-outlined !text-[22px]">settings</span></button>
+        <!-- User Menu -->
+        <div class="relative">
+          <button (click)="toggleUserMenu($event)" class="flex items-center gap-2 hover:text-[#ffbd0a] transition-colors cursor-pointer">
+            <span class="material-symbols-outlined !text-[22px]">account_circle</span>
+            <span class="text-[13px] font-bold max-w-[120px] truncate hidden md:inline">{{ currentUserDisplayName() || currentUsername() }}</span>
+          </button>
+
+          @if (showUserMenu()) {
+            <div role="menu" tabindex="-1" (keydown)="$event.stopPropagation()" (click)="$event.stopPropagation()" class="absolute right-0 mt-3.5 w-[240px] bg-[#1d2229] border border-white/10 rounded-2xl shadow-2xl z-[90] overflow-hidden text-on-surface animate-[slideUp_0.2s_ease-out]">
+              <!-- User Info Header -->
+              <div class="px-4 py-4 border-b border-white/5 bg-[#171a1f]">
+                <p class="text-[14px] font-extrabold text-[#f1f3f5] truncate">{{ currentUserDisplayName() || currentUsername() }}</p>
+                <p class="text-[11px] font-bold text-on-surface-variant/70 mt-0.5 truncate">
+                  {{ currentUserRole() | titlecase }}
+                  @if (currentSede(); as sede) {
+                    · {{ sede.name }}
+                  }
+                </p>
+              </div>
+
+              <!-- Menu Items -->
+              <div class="py-1.5">
+                <button type="button" (click)="showModal.set('password')" class="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-bold text-[#f1f3f5] hover:bg-white/5 transition-colors cursor-pointer text-left">
+                  <span class="material-symbols-outlined !text-[18px] text-on-surface-variant">settings</span>
+                  Cambiar Contraseña
+                </button>
+                <button type="button" (click)="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-bold text-error hover:bg-error/5 transition-colors cursor-pointer text-left">
+                  <span class="material-symbols-outlined !text-[18px]">logout</span>
+                  Cerrar Sesión
+                </button>
+              </div>
+            </div>
+          }
+        </div>
       </div>
     </header>
+
+    @if (showUserMenu()) {
+      <div (click)="closeUserMenu()" class="fixed inset-0 z-[80]"></div>
+    }
 
     <!-- Columns Container -->
     <div class="flex-1 p-4 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 overflow-hidden">
@@ -1810,6 +1854,61 @@
         </button>
       </div>
 
+    </div>
+  </div>
+}
+
+<!-- Password Change Modal -->
+@if (showModal() === 'password') {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in p-4" (click)="closeModal()">
+    <div (click)="$event.stopPropagation()" class="w-full max-w-[400px] bg-[#1a1c23] border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-[slideUp_0.25s_ease-out]">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 py-5 border-b border-white/5 bg-[#171a1f]">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-full bg-[#ffbd0a]/10 text-[#ffbd0a] flex items-center justify-center">
+            <span class="material-symbols-outlined !text-[22px]">lock</span>
+          </span>
+          <div>
+            <h3 class="text-[16px] font-black text-[#f1f3f5]">Cambiar Contraseña</h3>
+            <p class="text-[11px] font-bold text-on-surface-variant/70">Actualiza tu contraseña de acceso</p>
+          </div>
+        </div>
+        <button (click)="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/5 text-on-surface-variant hover:text-white cursor-pointer">
+          <span class="material-symbols-outlined !text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form (submit)="changePasswordSubmit($event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-[11px] font-bold text-on-surface-variant mb-1.5 tracking-wide uppercase">Contraseña Actual</label>
+          <input type="password" name="current_password" required placeholder="••••••••" class="w-full bg-[#242931] border border-white/5 rounded-md px-3.5 py-2.5 text-[14px] text-[#f1f3f5] placeholder:text-on-surface-variant/40 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-inner" autocomplete="current-password">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-on-surface-variant mb-1.5 tracking-wide uppercase">Nueva Contraseña</label>
+          <input type="password" name="new_password" required minlength="8" placeholder="Mínimo 8 caracteres" class="w-full bg-[#242931] border border-white/5 rounded-md px-3.5 py-2.5 text-[14px] text-[#f1f3f5] placeholder:text-on-surface-variant/40 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-inner" autocomplete="new-password">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-on-surface-variant mb-1.5 tracking-wide uppercase">Confirmar Nueva Contraseña</label>
+          <input type="password" name="confirm_password" required placeholder="Repite la nueva contraseña" class="w-full bg-[#242931] border border-white/5 rounded-md px-3.5 py-2.5 text-[14px] text-[#f1f3f5] placeholder:text-on-surface-variant/40 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-inner" autocomplete="new-password">
+        </div>
+
+        <!-- Error message -->
+        @if (passwordError()) {
+          <div class="p-3 rounded-lg bg-error/10 border border-error/20 text-error text-[12px] font-medium">
+            {{ passwordError() }}
+          </div>
+        }
+
+        <div class="flex items-center gap-3 pt-2">
+          <button type="button" (click)="closeModal()" class="flex-1 bg-surface-variant hover:bg-white/10 text-white font-bold py-3 rounded-lg transition-colors border border-white/5 active:scale-95 text-[13px] cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" [disabled]="passwordLoading()" class="flex-1 bg-[#ffbd0a] hover:bg-[#ffcd85] text-[#131517] font-black py-3 rounded-lg transition-all active:scale-95 shadow-md text-[13px] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+            {{ passwordLoading() ? 'Cambiando...' : 'Cambiar Contraseña' }}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 }

@@ -253,6 +253,10 @@ export class ApiService {
     return this.http.post<void>(`${API}/notifications/read-all`, {});
   }
 
+  changePassword(data: { current_password: string; new_password: string }): Observable<any> {
+    return this.http.put(`${API}/auth/me/password`, data);
+  }
+
   logout(): Observable<any> {
     return this.http.post(`${API}/auth/logout`, {});
   }
