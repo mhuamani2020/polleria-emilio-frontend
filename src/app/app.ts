@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 
 import { LoginFormComponent } from './forms/login-form.component';
 import { ApiService } from './services/api.service';
@@ -9,6 +10,8 @@ import { InventoryFormComponent } from './forms/inventory-form.component';
 import { MermaFormComponent } from './forms/merma-form.component';
 import { ComboFormComponent } from './forms/combo-form.component';
 import { SedeFormComponent } from './forms/sede-form.component';
+import { ConfirmService } from './services/confirm.service';
+import { ConfirmModalComponent } from './components/confirm-modal.component';
 
 type ViewType = 'dashboard' | 'pos' | 'kds' | 'inventory' | 'customer-display' | 'inventory-edit' | 'staff-register' | 'staff-list' | 'login' | 'merma-register' | 'combo-register' | 'sedes' | 'sede-register' | 'stats';
 
@@ -100,7 +103,8 @@ interface ToastItem {
     InventoryFormComponent,
     MermaFormComponent,
     ComboFormComponent,
-    SedeFormComponent
+    SedeFormComponent,
+    ConfirmModalComponent
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -108,6 +112,7 @@ interface ToastItem {
 export class App {
   private api = inject(ApiService);
   private auth = inject(AuthService);
+  private confirmService = inject(ConfirmService);
 
   currentView = signal<ViewType>('login');
   isLoading = signal(false);
@@ -615,63 +620,66 @@ export class App {
     });
   }
 
-  handleLogin(creds: { username: string; password: string; role: 'admin' | 'cajero' | 'mesero'; sedeId: string; displayName: string }, force = false) {
+  async handleLogin(creds: { username: string; password: string; role: 'admin' | 'cajero' | 'mesero'; sedeId: string; displayName: string }, force = false) {
     this.isLoading.set(true);
     const body: Record<string, unknown> = { username: creds.username, password: creds.password };
     if (force) body['force'] = true;
-    this.api.login(body as any).subscribe({
-      next: (tokens) => {
-        this.auth.setTokens(tokens.access_token, tokens.refresh_token);
-        this.api.getMe().subscribe({
-          next: (user) => {
-            this.auth.setSession({
-              role: user.role,
-              sedeId: user.sede_id,
-              username: user.username,
-              userId: user.user_id,
-            });
-            this.currentUserRole.set(user.role);
-            this.currentUsername.set(user.username);
-            this.selectSedeById(user.sede_id);
-            this.isLoading.set(false);
-            this.addNotification('Inicio de Sesión Exitoso ✔️', `Bienvenido ${user.username}`, 'success');
-            if (user.role === 'admin') {
-              this.changeView('dashboard');
-            } else {
-              this.changeView('pos');
-            }
-          },
-          error: () => {
-            this.isLoading.set(false);
-            this.auth.setSession({
-              role: creds.role,
-              sedeId: creds.sedeId,
-              username: creds.displayName,
-              userId: '',
-            });
-            this.currentUserRole.set(creds.role);
-            this.currentUsername.set(creds.displayName);
-            this.selectSedeById(creds.sedeId);
-            if (creds.role === 'admin') {
-              this.changeView('dashboard');
-            } else {
-              this.changeView('pos');
-            }
-          }
+    try {
+      const tokens = await firstValueFrom(this.api.login(body as any));
+      this.auth.setTokens(tokens.access_token, tokens.refresh_token);
+      try {
+        const user = await firstValueFrom(this.api.getMe());
+        this.auth.setSession({
+          role: user.role,
+          sedeId: user.sede_id,
+          username: user.username,
+          userId: user.user_id,
         });
-      },
-      error: (err) => {
+        this.currentUserRole.set(user.role);
+        this.currentUsername.set(user.username);
+        this.selectSedeById(user.sede_id);
         this.isLoading.set(false);
-        const detail = err.error?.detail || err.message || 'Error de conexión';
-        if (err.status === 409) {
-          if (confirm('Ya tienes una sesión activa en otro dispositivo. ¿Deseas cerrarla e iniciar sesión aquí?')) {
-            this.handleLogin(creds, true);
-          }
+        this.addNotification('Inicio de Sesión Exitoso ✔️', `Bienvenido ${user.username}`, 'success');
+        if (user.role === 'admin') {
+          this.changeView('dashboard');
         } else {
-          this.addNotification('Error de Login ❌', detail, 'alert');
+          this.changeView('pos');
+        }
+      } catch {
+        this.isLoading.set(false);
+        this.auth.setSession({
+          role: creds.role,
+          sedeId: creds.sedeId,
+          username: creds.displayName,
+          userId: '',
+        });
+        this.currentUserRole.set(creds.role);
+        this.currentUsername.set(creds.displayName);
+        this.selectSedeById(creds.sedeId);
+        if (creds.role === 'admin') {
+          this.changeView('dashboard');
+        } else {
+          this.changeView('pos');
         }
       }
-    });
+    } catch (err: any) {
+      this.isLoading.set(false);
+      const detail = err.error?.detail || err.message || 'Error de conexión';
+      if (err.status === 409) {
+        const ok = await this.confirmService.confirm({
+          title: 'Sesión Activa',
+          message: 'Ya tienes una sesión activa en otro dispositivo. ¿Deseas cerrarla e iniciar sesión aquí?',
+          confirmText: 'Forzar Sesión',
+          cancelText: 'Cancelar',
+          type: 'warning',
+        });
+        if (ok) {
+          this.handleLogin(creds, true);
+        }
+      } else {
+        this.addNotification('Error de Login ❌', detail, 'alert');
+      }
+    }
   }
 
   onSedeChange(event: Event) {
