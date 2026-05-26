@@ -618,7 +618,7 @@ export class App {
   handleLogin(creds: { username: string; password: string; role: 'admin' | 'cajero' | 'mesero'; sedeId: string; displayName: string }, force = false) {
     this.isLoading.set(true);
     const body: Record<string, unknown> = { username: creds.username, password: creds.password };
-    if (force) body.force = true;
+    if (force) body['force'] = true;
     this.api.login(body as any).subscribe({
       next: (tokens) => {
         this.auth.setTokens(tokens.access_token, tokens.refresh_token);
