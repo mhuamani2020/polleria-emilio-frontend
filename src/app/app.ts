@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 
 import { LoginFormComponent } from './forms/login-form.component';
@@ -99,6 +100,7 @@ interface ToastItem {
   selector: 'app-root',
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     LoginFormComponent,
     StaffFormComponent,
     InventoryFormComponent,
@@ -171,6 +173,11 @@ export class App {
   showModal = signal<'none' | 'order' | 'stock' | 'staff' | 'staff-update' | 'staff-delete' | 'sede' | 'password'>('none');
   passwordError = signal<string>('');
   passwordLoading = signal<boolean>(false);
+  passwordForm = new FormGroup({
+    current_password: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    new_password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(8)] }),
+    confirm_password: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+  });
   currentUserRole = signal<'admin' | 'cajero' | 'mesero'>('admin');
   currentUsername = signal<string>('Invitado');
   currentUserDisplayName = signal<string>('');
@@ -629,6 +636,7 @@ export class App {
     this.staffToDeleteId.set(null);
     this.passwordError.set('');
     this.passwordLoading.set(false);
+    this.passwordForm.reset();
   }
 
   confirmSaveStaff(data: { name: string; dni: string; phone: string; role: string; shift: string; status: 'Activo' | 'Inactivo' }) {
@@ -777,31 +785,24 @@ export class App {
     this.selectSedeById(target.value);
   }
 
-  changePasswordSubmit(event: Event) {
-    event.preventDefault();
+  changePasswordSubmit() {
     this.passwordError.set('');
-    const form = event.target as HTMLFormElement;
-    const current = (form.elements.namedItem('current_password') as HTMLInputElement).value;
-    const newPass = (form.elements.namedItem('new_password') as HTMLInputElement).value;
-    const confirm = (form.elements.namedItem('confirm_password') as HTMLInputElement).value;
+    this.passwordForm.markAllAsTouched();
+    if (this.passwordForm.invalid) return;
 
-    if (!current || !newPass || !confirm) {
-      this.passwordError.set('Todos los campos son obligatorios');
-      return;
-    }
-    if (newPass.length < 8) {
-      this.passwordError.set('La nueva contraseña debe tener al menos 8 caracteres');
-      return;
-    }
-    if (newPass !== confirm) {
+    const { current_password, new_password, confirm_password } = this.passwordForm.getRawValue();
+    if (new_password !== confirm_password) {
       this.passwordError.set('Las contraseñas nuevas no coinciden');
       return;
     }
 
     this.passwordLoading.set(true);
-    this.handlePasswordChange({ current_password: current, new_password: newPass }).then(ok => {
+    this.handlePasswordChange({ current_password, new_password }).then(ok => {
       this.passwordLoading.set(false);
-      if (ok) this.closeModal();
+      if (ok) {
+        this.passwordForm.reset();
+        this.closeModal();
+      }
     });
   }
 

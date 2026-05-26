@@ -1879,18 +1879,27 @@
       </div>
 
       <!-- Form -->
-      <form (submit)="changePasswordSubmit($event)" class="p-6 space-y-4">
+      <form [formGroup]="passwordForm" (ngSubmit)="changePasswordSubmit()" class="p-6 space-y-4">
         <div>
           <label class="block text-[11px] font-bold text-on-surface-variant mb-1.5 tracking-wide uppercase">Contraseña Actual</label>
-          <input type="password" name="current_password" required placeholder="••••••••" class="w-full bg-[#242931] border border-white/5 rounded-md px-3.5 py-2.5 text-[14px] text-[#f1f3f5] placeholder:text-on-surface-variant/40 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-inner" autocomplete="current-password">
+          <input formControlName="current_password" type="password" placeholder="••••••••" class="w-full bg-[#242931] border border-white/5 rounded-md px-3.5 py-2.5 text-[14px] text-[#f1f3f5] placeholder:text-on-surface-variant/40 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-inner" autocomplete="current-password" [class.border-error]="passwordForm.controls.current_password.touched && passwordForm.controls.current_password.invalid">
+          @if (passwordForm.controls.current_password.touched && passwordForm.controls.current_password.invalid) {
+            <p class="text-[11px] font-bold text-error mt-1">Campo obligatorio</p>
+          }
         </div>
         <div>
           <label class="block text-[11px] font-bold text-on-surface-variant mb-1.5 tracking-wide uppercase">Nueva Contraseña</label>
-          <input type="password" name="new_password" required minlength="8" placeholder="Mínimo 8 caracteres" class="w-full bg-[#242931] border border-white/5 rounded-md px-3.5 py-2.5 text-[14px] text-[#f1f3f5] placeholder:text-on-surface-variant/40 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-inner" autocomplete="new-password">
+          <input formControlName="new_password" type="password" placeholder="Mínimo 8 caracteres" class="w-full bg-[#242931] border border-white/5 rounded-md px-3.5 py-2.5 text-[14px] text-[#f1f3f5] placeholder:text-on-surface-variant/40 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-inner" autocomplete="new-password" [class.border-error]="passwordForm.controls.new_password.touched && passwordForm.controls.new_password.invalid">
+          @if (passwordForm.controls.new_password.touched && passwordForm.controls.new_password.invalid) {
+            <p class="text-[11px] font-bold text-error mt-1">Mínimo 8 caracteres</p>
+          }
         </div>
         <div>
           <label class="block text-[11px] font-bold text-on-surface-variant mb-1.5 tracking-wide uppercase">Confirmar Nueva Contraseña</label>
-          <input type="password" name="confirm_password" required placeholder="Repite la nueva contraseña" class="w-full bg-[#242931] border border-white/5 rounded-md px-3.5 py-2.5 text-[14px] text-[#f1f3f5] placeholder:text-on-surface-variant/40 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-inner" autocomplete="new-password">
+          <input formControlName="confirm_password" type="password" placeholder="Repite la nueva contraseña" class="w-full bg-[#242931] border border-white/5 rounded-md px-3.5 py-2.5 text-[14px] text-[#f1f3f5] placeholder:text-on-surface-variant/40 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-inner" autocomplete="new-password" [class.border-error]="passwordForm.controls.confirm_password.touched && passwordForm.controls.confirm_password.invalid">
+          @if (passwordForm.controls.confirm_password.touched && passwordForm.controls.confirm_password.invalid) {
+            <p class="text-[11px] font-bold text-error mt-1">Campo obligatorio</p>
+          }
         </div>
 
         <!-- Error message -->
