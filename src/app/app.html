@@ -50,6 +50,7 @@
           <span class="truncate opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">Kitchen KDS</span>
         </button>
         
+        @if (currentUserRole() === 'admin') {
         <button 
           (click)="changeView('dashboard')"
           [class]="currentView() === 'dashboard' ? 'bg-primary text-on-primary font-black shadow-[0_4px_15px_rgba(255,179,0,0.3)]' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
@@ -57,7 +58,9 @@
           <span class="material-symbols-outlined !text-[24px] group-hover:scale-110 transition-transform shrink-0" [class.opacity-80]="currentView() !== 'dashboard'">dashboard</span>
           <span class="truncate opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">Dashboard</span>
         </button>
+        }
 
+        @if (currentUserRole() === 'admin' || currentUserRole() === 'cajero') {
         <button 
           (click)="changeView('inventory')"
           [class]="currentView() === 'inventory' ? 'bg-primary text-on-primary font-black shadow-[0_4px_15px_rgba(255,179,0,0.3)]' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
@@ -65,7 +68,9 @@
           <span class="material-symbols-outlined !text-[24px] group-hover:scale-110 transition-transform shrink-0" [class.opacity-80]="currentView() !== 'inventory'">inventory_2</span>
           <span class="truncate opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">Inventory</span>
         </button>
+        }
         
+        @if (currentUserRole() === 'admin') {
         <button 
           (click)="changeView('staff-list')"
           [class]="(currentView() === 'staff-list' || currentView() === 'staff-register') ? 'bg-[#3b3db9] text-white font-black shadow-lg' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
@@ -73,7 +78,9 @@
           <span class="material-symbols-outlined !text-[24px] group-hover:scale-110 transition-transform shrink-0" [class.opacity-80]="currentView() !== 'staff-list' && currentView() !== 'staff-register'">badge</span>
           <span class="truncate opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">Staff Management</span>
         </button>
+        }
 
+        @if (currentUserRole() === 'admin') {
         <button 
           (click)="changeView('sedes')"
           [class]="(currentView() === 'sedes' || currentView() === 'sede-register') ? 'bg-[#ffbd0a] text-black font-black shadow-[0_4px_15px_rgba(255,179,0,0.3)]' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
@@ -81,9 +88,11 @@
           <span class="material-symbols-outlined !text-[24px] group-hover:scale-110 transition-transform shrink-0" [class.opacity-80]="currentView() !== 'sedes' && currentView() !== 'sede-register'">storefront</span>
           <span class="truncate opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">Sedes</span>
         </button>
+        }
       </nav>
       
       <div class="px-4 group-hover/sidebar:px-6 pb-6 pt-4 border-t border-white/5 space-y-4 shrink-0 transition-all">
+        @if (currentUserRole() === 'admin') {
         <button 
           (click)="changeView('stats')"
           [class]="currentView() === 'stats' ? 'bg-[#ffbd0a] text-[#131517] font-black shadow-[0_4px_15px_rgba(255,179,0,0.3)]' : 'bg-[#ffbd0a]/10 hover:bg-[#ffbd0a]/20 text-[#ffbd0a] font-bold'"
@@ -91,6 +100,7 @@
           <span class="material-symbols-outlined !text-[24px] group-hover:rotate-12 transition-transform shrink-0" [class.text-[#131517]]="currentView() === 'stats'">bolt</span>
           <span class="truncate opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 text-[14px]">Quick Stats</span>
         </button>
+        }
         
         <div class="flex flex-col gap-1">
           <button (click)="changeView('login')" class="w-full h-11 flex items-center justify-start gap-5 px-3 rounded-lg text-on-surface-variant hover:text-error hover:bg-error/5 transition-all group">
@@ -221,6 +231,7 @@
             <span>Kitchen KDS</span>
           </button>
           
+          @if (currentUserRole() === 'admin') {
           <button 
             (click)="changeView('dashboard')"
             [class]="currentView() === 'dashboard' ? 'bg-primary text-on-primary font-bold shadow-sm' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
@@ -228,7 +239,9 @@
             <span class="material-symbols-outlined !text-[20px]">dashboard</span>
             <span>Dashboard</span>
           </button>
+          }
 
+          @if (currentUserRole() === 'admin' || currentUserRole() === 'cajero') {
           <button 
             (click)="changeView('inventory')"
             [class]="currentView() === 'inventory' ? 'bg-primary text-on-primary font-bold shadow-sm' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
@@ -236,7 +249,9 @@
             <span class="material-symbols-outlined !text-[20px]">inventory_2</span>
             <span>Inventory</span>
           </button>
+          }
           
+          @if (currentUserRole() === 'admin') {
           <button 
             (click)="changeView('staff-list')"
             [class]="(currentView() === 'staff-list' || currentView() === 'staff-register') ? 'bg-[#3b3db9] text-white font-bold shadow-sm' : 'text-on-surface-variant hover:bg-surface-variant/20 hover:text-on-surface font-bold'"
@@ -244,6 +259,7 @@
             <span class="material-symbols-outlined !text-[20px]">badge</span>
             <span>Staff</span>
           </button>
+          }
 
           @if (currentUserRole() === 'admin') {
             <button 

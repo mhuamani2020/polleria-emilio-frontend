@@ -404,6 +404,12 @@ export class App {
   mobileSidebarOpen = signal(false);
 
   changeView(view: ViewType) {
+    const role = this.currentUserRole();
+    const adminOnly: ViewType[] = ['dashboard', 'sedes', 'staff-list', 'staff-register', 'sede-register', 'stats'];
+    const cajeroAllowed: ViewType[] = ['pos', 'kds', 'inventory', 'inventory-edit', 'merma-register'];
+    if (role === 'mesero' && !['pos', 'login'].includes(view)) return;
+    if (role === 'cajero' && !cajeroAllowed.includes(view) && !adminOnly.includes(view)) return;
+    if (role === 'cajero' && adminOnly.includes(view)) return;
     this.currentView.set(view);
     this.mobileSidebarOpen.set(false);
     if (view === 'dashboard') { this.loadDashboard(); this.loadNotifications(); }
